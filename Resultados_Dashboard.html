@@ -58,9 +58,9 @@ body{font-family:Arial,'Segoe UI',sans-serif;background:var(--bg);color:var(--te
 .filter-pill{display:flex;gap:4px;flex-wrap:wrap}
 .pill{padding:5px 14px;border-radius:2px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border);background:#fff;color:var(--text-muted);transition:all .2s;font-family:Arial,sans-serif}
 .pill:hover{background:var(--hp-light);border-color:var(--hp-blue);color:var(--hp-blue)}
-.pill.product-computo.active{background:#0096D6;border-color:#0096D6;color:#fff}
-.pill.product-print.active{background:#FF8900;border-color:#FF8900;color:#fff}
-.pill.product-gaming.active{background:#00D072;border-color:#00D072;color:#0E2841}
+.pill.product-computo.active{background:#0047AB;border-color:#0047AB;color:#fff}
+.pill.product-print.active{background:#00BCD4;border-color:#00BCD4;color:#fff}
+.pill.product-gaming.active{background:#FF3900;border-color:#FF3900;color:#fff}
 select.filter-select{padding:5px 12px;border-radius:2px;border:2px solid var(--border);font-size:12px;font-family:Arial,sans-serif;color:var(--text);background:#fff;cursor:pointer;outline:none;font-weight:600}
 select.filter-select:focus{border-color:var(--hp-blue)}
 .filter-divider{width:1px;height:24px;background:var(--border)}
@@ -258,7 +258,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
       <div class="kpi-icon">📋</div>
       <div class="kpi-label">Total Actividades</div>
       <div class="kpi-value" id="kpi-total">—</div>
-      <div class="kpi-sub">3 líneas de producto</div>
+      <div class="kpi-sub">3 categorías de producto</div>
       <div class="kpi-trend up" id="kpi-trend-total">▲ +8.7% vs Junio</div>
     </div>
     <div class="kpi-card purple">
@@ -321,7 +321,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
           <div class="chart-detail">Proporción de cada actividad</div>
         </div>
       </div>
-      <div class="chart-wrap tall"><canvas id="chart-pie-type"></canvas></div>
+      <div class="chart-wrap"><canvas id="chart-pie-type"></canvas></div>
     </div>
   </div>
 
@@ -330,7 +330,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
     <div class="chart-card">
       <div class="chart-head">
         <div>
-          <div class="chart-name">Por Línea de Producto</div>
+          <div class="chart-name">Por Categoría de Productos</div>
           <div class="chart-detail">Computo · Print · Gaming</div>
         </div>
       </div>
@@ -514,19 +514,19 @@ const RAW = {
 };
 
 const ACT_COLORS = {
-  W:'#0096D6',   // HP Blue     — Webcast
-  C:'#FF8900',   // HP Orange   — Canales Mayoristas
-  R:'#FF3900',   // HP Red      — Retail/Evento
-  E:'#FFE137',   // HP Yellow   — ESF Grupales
-  X:'#00D072',   // HP Green    — Capacit. 1:1
-  T:'#0249D6',   // HP Deep Blue— Talleres
-  RG:'#568392',  // HP Steel    — Retail Grupales
-  V:'#F26B43'    // HP Coral    — Virtual
+  W:'#0047AB',   // Cobalt Blue     — Webcast
+  C:'#FF6B6B',   // Sunset Orange   — Canales Mayoristas
+  R:'#20B2AA',   // Teal Aqua       — Retail/Evento
+  E:'#FFD700',   // Golden Yellow   — ESF Grupales
+  X:'#9400D3',   // Deep Violet     — Capacit. 1:1
+  T:'#F08080',   // Coral Red       — Talleres
+  RG:'#2E8B57',  // Sea Green       — Retail Grupales
+  V:'#4B0082'    // Indigo          — Virtual
 };
 const PROD_COLORS = {
-  Computo:'#0096D6',  // HP Blue
-  Print:'#FF8900',    // HP Orange
-  Gaming:'#00D072'    // HP Green
+  Computo:'#0047AB',  // Cobalt Blue (azul marino)
+  Print:'#00BCD4',    // Cyan
+  Gaming:'#FF3900'    // Rojo
 };
 
 // ════════════════════════════════════════════════════════════
@@ -690,8 +690,8 @@ function renderAll() {
       datasets: radarCountries.map((c,i)=>({
         label:c.country,
         data:RAW.actKeys.map(a=>getByAct(c,a)),
-        borderColor:['#0096D6','#FF3900','#00D072','#FFE137'][i],
-        backgroundColor:['#0096D622','#FF390022','#00D07222','#FFE13730'][i],
+        borderColor:['#0047AB','#FF3900','#00BCD4','#FFD700'][i],
+        backgroundColor:['#0047AB22','#FF390022','#00BCD422','#FFD70030'][i],
         pointRadius:3
       }))
     },
@@ -725,7 +725,7 @@ function renderAll() {
     data:{
       labels:regEntries.map(e=>e[0]),
       datasets:[{label:'Actividades',data:regEntries.map(e=>e[1]),
-        backgroundColor:['#0096D6','#FF8900','#00D072','#0249D6','#FF3900'],
+        backgroundColor:['#0047AB','#FF6B6B','#20B2AA','#9400D3','#FF3900'],
         borderRadius:6,borderWidth:0}]
     },
     options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.4,
