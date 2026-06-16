@@ -614,7 +614,7 @@ function renderAll() {
     </div>`).join('');
 
   // ── STACKED BAR: Country x Type ───────────────────────────
-  const stackedLabels = countries.map(c=>c.flag+' '+c.country);
+  const stackedLabels = countries.map(c=>c.country);
   const stackedDatasets = RAW.actKeys.map(act=>({
     label: RAW.actLabels[act],
     data: countries.map(c=>getByAct(c,act)),
@@ -688,7 +688,7 @@ function renderAll() {
     data:{
       labels: RAW.actKeys.map(a=>RAW.actLabels[a]),
       datasets: radarCountries.map((c,i)=>({
-        label:c.flag+' '+c.country,
+        label:c.country,
         data:RAW.actKeys.map(a=>getByAct(c,a)),
         borderColor:['#0096D6','#FF3900','#00D072','#FFE137'][i],
         backgroundColor:['#0096D622','#FF390022','#00D07222','#FFE13730'][i],
@@ -710,7 +710,7 @@ function renderAll() {
     const cls = t>=150?'light-green':t>=60?'light-yellow':'light-red';
     return `<div class="traffic-row">
       <div class="traffic-light ${cls}"></div>
-      <div class="traffic-country">${c.flag} ${c.country}</div>
+      <div class="traffic-country">${c.country}</div>
       <div class="traffic-bar-wrap"><div class="traffic-bar" style="width:${pct}%;background:${t>=150?'#00A85A':t>=60?'#FF8900':'#FF3900'}"></div></div>
       <div class="traffic-val">${t}</div>
     </div>`;
@@ -765,7 +765,7 @@ function renderAll() {
   makeChart('chart-grouped',{
     type:'bar',
     data:{
-      labels:gCountries.map(c=>c.flag+' '+c.country),
+      labels:gCountries.map(c=>c.country),
       datasets: RAW.products.filter(p=>state.products.includes(p)).map(p=>({
         label:p,
         data:gCountries.map(c=>c.byProduct[p].TOTAL),
@@ -794,7 +794,7 @@ function renderAll() {
   makeChart('chart-hbar',{
     type:'bar',
     data:{
-      labels:hbarCountries.map(c=>c.flag+' '+c.country),
+      labels:hbarCountries.map(c=>c.country),
       datasets:[{label:'Total',data:hbarCountries.map(c=>getTotal(c)),
         backgroundColor:hbarCountries.map(c=>getTotal(c)>=200?'#0096D6':getTotal(c)>=100?'#0249D6':getTotal(c)>=60?'#FF8900':'#FF3900'),
         borderRadius:4,borderWidth:0}]
@@ -844,7 +844,7 @@ function renderAll() {
   const allTrainers = [];
   countries.forEach(c=>{
     c.trainers.forEach(t=>{
-      const tr = {name:t,country:c.flag+' '+c.country,region:c.region};
+      const tr = {name:t,country:c.country,region:c.region};
       RAW.products.forEach(p=>{ tr[p] = c.byProduct[p].TOTAL / Math.max(c.trainers.length,1) | 0; });
       tr.TOTAL = state.products.reduce((s,p)=>s+tr[p],0);
       allTrainers.push(tr);
@@ -897,7 +897,7 @@ document.getElementById('sel-pais').addEventListener('change', e=>{
 const selPais = document.getElementById('sel-pais');
 RAW.countries.forEach(c=>{
   const o = document.createElement('option');
-  o.value = c.country; o.textContent = c.flag+' '+c.country;
+  o.value = c.country; o.textContent = c.country;
   selPais.appendChild(o);
 });
 
@@ -948,7 +948,7 @@ Chart.defaults.plugins.legend.labels.padding = 16;
       const item = document.createElement('div');
       item.className = 'flag-item';
       item.title = `${c.country} — ${c.TOTAL} actividades`;
-      item.innerHTML = `<span class="flag-emoji">${c.flag}</span><span class="flag-name">${c.country}</span><span class="flag-total">${c.TOTAL}</span>`;
+      item.innerHTML = `<span class="flag-name">${c.country}</span><span class="flag-total">${c.TOTAL}</span>`;
       strip.appendChild(item);
     });
   });
