@@ -854,7 +854,7 @@ function renderAll() {
   const maxT = allTrainers[0]?.TOTAL||1;
   document.getElementById('trainer-body').innerHTML = allTrainers.map(t=>`
     <tr>
-      nt-weight:600">${t.name}</td>
+      <td style="font-weight:600">${t.name}</td>
       <td>${t.country}</td>
       <td><span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--hp-light);color:var(--hp-dark);font-weight:600">${t.region}</span></td>
       <td style="color:${PROD_COLORS.Computo}">${t.Computo}</td>
