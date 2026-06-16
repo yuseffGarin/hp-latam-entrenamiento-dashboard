@@ -973,4 +973,15 @@ function updateTimestamp(){
 
 function updateCountdown(){
   countdown--;
-  if(countdown <= 0){ location.reload(); ret
+  if(countdown <= 0){ urn; }
+  const mins = Math.floor(countdown/60);
+  const secs = countdown % 60;
+  const el = document.getElementById('refresh-countdown');
+  if(el) el.textContent = `↻ ${pad(mins)}:${pad(secs)}`;
+}
+
+updateTimestamp();
+setInterval(updateCountdown, 1000);
+</script>
+</body>
+</html>
