@@ -1446,11 +1446,19 @@ setInterval(updateCountdown, 1000);
   function saveUsers(u) { localStorage.setItem(STORE_KEY, JSON.stringify(u)); }
   function hashPass(p) { return btoa(unescape(encodeURIComponent(p + '_hp2026salt'))); }
 
+  // Hardcoded seed users — always available regardless of browser/device
+  const SEED_USERS = {
+    'admin':  { hash: hashPass('hp2026'),    role: 'admin' },
+    'yuseff': { hash: hashPass('hp2026'),    role: 'admin' },
+    'hp':     { hash: hashPass('latam2026'), role: 'viewer' },
+  };
+
   let users = getUsers();
-  if (!Object.keys(users).length) {
-    users['admin'] = { hash: hashPass('hp2026'), role: 'admin', created: new Date().toISOString() };
-    saveUsers(users);
+  let _changed = false;
+  for (const [name, data] of Object.entries(SEED_USERS)) {
+    if (!users[name]) { users[name] = { ...data, created: new Date().toISOString() }; _changed = true; }
   }
+  if (_changed) saveUsers(users);
 
   function getSession() {
     try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e) { return null; }
