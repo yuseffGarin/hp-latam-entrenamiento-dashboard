@@ -73,7 +73,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 
 /* ── KPI CARDS ── */
 .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
-.kpi-card{background:var(--surface);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;transition:transform .2s;border:1px solid var(--border)}
+.kpi-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;position:relative;overflow:hidden;transition:transform .2s;border:1px solid var(--border)}.kpi-text{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}.kpi-logo-right{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:72px}.kpi-logo-right img{max-width:72px;max-height:56px;width:auto;height:auto;object-fit:contain}
 .kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,0.1)}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
 .kpi-card.blue::before{background:var(--hp-blue)}
@@ -82,7 +82,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 .kpi-card.orange::before{background:var(--hp-red)}
 .kpi-card.dark::before{background:var(--hp-dark)}
 .kpi-card.teal::before{background:var(--hp-mid)}
-.kpi-icon{font-size:20px;margin-bottom:4px}.kpi-logo{font-size:0;display:flex;align-items:center;justify-content:center;height:48px;margin-bottom:4px}.kpi-logo img{max-height:48px;max-width:100%;width:auto;object-fit:contain}
+.kpi-icon{font-size:20px;margin-bottom:4px}
 .kpi-label{font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.8px}
 .kpi-value{font-size:30px;font-weight:700;color:var(--text);line-height:1.1;font-family:Arial,sans-serif}
 .kpi-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
@@ -260,46 +260,58 @@ select.filter-select:focus{border-color:var(--hp-blue)}
   <div class="section-title">Indicadores Clave (KPIs)</div>
   <div class="kpi-row">
     <div class="kpi-card blue">
-      <div class="kpi-icon kpi-logo"><img src="" id="logo-actividades" alt="Actividades"></div>
-      <div class="kpi-label">Total Actividades</div>
-      <div class="kpi-value" id="kpi-total">—</div>
-      <div class="kpi-sub">3 categorías de producto</div>
-      <div class="kpi-trend up" id="kpi-trend-total">▲ +8.7% vs Junio</div>
+      <div class="kpi-text">
+        <div class="kpi-label">Total Actividades</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-sub">3 categorías de producto</div>
+        <div class="kpi-trend up" id="kpi-trend-total">▲ +8.7% vs Junio</div>
+      </div>
+      <div class="kpi-logo-right"><img src="" id="logo-actividades" alt="Actividades"></div>
     </div>
     <div class="kpi-card purple">
-      <div class="kpi-icon kpi-logo"><img src="" id="logo-hp" alt="HP Print"></div>
-      <div class="kpi-label">Print</div>
-      <div class="kpi-value" id="kpi-print">—</div>
-      <div class="kpi-sub" id="kpi-print-pct">—% del total</div>
-      <div class="kpi-trend up">▲ Línea más activa</div>
+      <div class="kpi-text">
+        <div class="kpi-label">Print</div>
+        <div class="kpi-value" id="kpi-print">—</div>
+        <div class="kpi-sub" id="kpi-print-pct">—% del total</div>
+        <div class="kpi-trend up">▲ Línea más activa</div>
+      </div>
+      <div class="kpi-logo-right"><img src="" id="logo-hp" alt="HP Print"></div>
     </div>
     <div class="kpi-card green">
-      <div class="kpi-icon kpi-logo"><img src="" id="logo-hyperx" alt="HyperX Gaming"></div>
-      <div class="kpi-label">Gaming</div>
-      <div class="kpi-value" id="kpi-gaming">—</div>
-      <div class="kpi-sub" id="kpi-gaming-pct">—% del total</div>
-      <div class="kpi-trend flat">→ Crecimiento sostenido</div>
+      <div class="kpi-text">
+        <div class="kpi-label">Gaming</div>
+        <div class="kpi-value" id="kpi-gaming">—</div>
+        <div class="kpi-sub" id="kpi-gaming-pct">—% del total</div>
+        <div class="kpi-trend flat">→ Crecimiento sostenido</div>
+      </div>
+      <div class="kpi-logo-right"><img src="" id="logo-hyperx" alt="HyperX Gaming"></div>
     </div>
     <div class="kpi-card orange">
-      <div class="kpi-icon kpi-logo"><img src="" id="logo-omnibook" alt="Omnibook Cómputo"></div>
-      <div class="kpi-label">Computo</div>
-      <div class="kpi-value" id="kpi-computo">—</div>
-      <div class="kpi-sub" id="kpi-computo-pct">—% del total</div>
-      <div class="kpi-trend up">▲ En desarrollo</div>
+      <div class="kpi-text">
+        <div class="kpi-label">Computo</div>
+        <div class="kpi-value" id="kpi-computo">—</div>
+        <div class="kpi-sub" id="kpi-computo-pct">—% del total</div>
+        <div class="kpi-trend up">▲ En desarrollo</div>
+      </div>
+      <div class="kpi-logo-right"><img src="" id="logo-omnibook" alt="Omnibook Cómputo"></div>
     </div>
     <div class="kpi-card dark">
-      <div class="kpi-icon kpi-logo"><img src="" id="logo-mundo" alt="Países LATAM"></div>
-      <div class="kpi-label">Países Activos</div>
-      <div class="kpi-value" id="kpi-paises">—</div>
-      <div class="kpi-sub">de 12 mercados</div>
-      <div class="kpi-trend flat" id="kpi-region-txt">LATAM</div>
+      <div class="kpi-text">
+        <div class="kpi-label">Países Activos</div>
+        <div class="kpi-value" id="kpi-paises">—</div>
+        <div class="kpi-sub">de 12 mercados</div>
+        <div class="kpi-trend flat" id="kpi-region-txt">LATAM</div>
+      </div>
+      <div class="kpi-logo-right"><img src="" id="logo-mundo" alt="Países LATAM"></div>
     </div>
     <div class="kpi-card teal">
-      <div class="kpi-icon">👥</div>
-      <div class="kpi-label">Entrenadores</div>
-      <div class="kpi-value" id="kpi-trainers">—</div>
-      <div class="kpi-sub" id="kpi-trainer-active">activos en el período</div>
-      <div class="kpi-trend up">▲ Red activa</div>
+      <div class="kpi-text">
+        <div class="kpi-label">Entrenadores</div>
+        <div class="kpi-value" id="kpi-trainers">—</div>
+        <div class="kpi-sub" id="kpi-trainer-active">activos en el período</div>
+        <div class="kpi-trend up">▲ Red activa</div>
+      </div>
+      <div class="kpi-logo-right" style="font-size:40px">👥</div>
     </div>
   </div>
 
