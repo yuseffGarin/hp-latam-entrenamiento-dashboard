@@ -138,6 +138,9 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 .trainer-table td:not(:first-child){text-align:center;font-weight:600;font-size:13px}
 .total-col{background:var(--hp-blue)!important;color:#fff!important;border-radius:2px;padding:2px 6px!important;display:inline-block}
 .mini-bar{height:4px;background:var(--hp-blue);border-radius:2px;margin-top:3px;transition:width .4s}
+.act-donut{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.act-donut-label{font-size:9px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.3px;line-height:1.3}
+.act-donut-pct{font-size:13px;font-weight:800;color:var(--hp-blue)}
 
 /* ── REGION BADGES ── */
 .region-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
@@ -956,9 +959,22 @@ function renderAll() {
     });
   });
   allTrainers.sort((a,b)=>b.TOTAL-a.TOTAL);
-  const maxT = allTrainers[0]?.TOTAL||1;
-  document.getElementById('trainer-body').innerHTML = allTrainers.map(t=>`
-    <tr>
+  // Regional totals for donut chart
+  const regionTotals = {};
+  allTrainers.forEach(t=>{ regionTotals[t.region] = (regionTotals[t.region]||0) + t.TOTAL; });
+  document.getElementById('trainer-body').innerHTML = allTrainers.map(t=>{
+    const regTotal = regionTotals[t.region]||1;
+    const pct = Math.round(t.TOTAL/regTotal*100);
+    const R=16, circ=2*Math.PI*R;
+    const dash=(pct/100)*circ;
+    const donutSvg=`<svg width="40" height="40" viewBox="0 0 40 40" style="flex-shrink:0">
+      <circle cx="20" cy="20" r="${R}" fill="none" stroke="#dde6f0" stroke-width="5"/>
+      <circle cx="20" cy="20" r="${R}" fill="none" stroke="#0047AB" stroke-width="5"
+        stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}"
+        transform="rotate(-90 20 20)"/>
+      <text x="20" y="24" text-anchor="middle" font-size="8" font-weight="700" fill="#0047AB">${pct}%</text>
+    </svg>`;
+    return `<tr>
       <td style="font-weight:600">${t.name}</td>
       <td style="white-space:nowrap;text-align:left"><img src="${FLAG_IMGS[t.country]||''}" style="width:22px;height:14px;object-fit:cover;border-radius:2px;vertical-align:bottom;margin-right:6px;flex-shrink:0">${t.country}</td>
       <td><span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--hp-light);color:var(--hp-dark);font-weight:600">${t.region}</span></td>
@@ -966,8 +982,9 @@ function renderAll() {
       <td style="color:${PROD_COLORS.Print}">${t.Print}</td>
       <td style="color:${PROD_COLORS.Gaming}">${t.Gaming}</td>
       <td><span class="total-col">${t.TOTAL}</span></td>
-      <td style="min-width:80px"><div class="mini-bar" style="width:${(t.TOTAL/maxT)*100}%"></div></td>
-    </tr>`).join('');
+      <td style="min-width:160px"><div class="act-donut">${donutSvg}<div><div class="act-donut-label">Participación<br>Total Regional</div><div class="act-donut-pct">${pct}%</div></div></div></td>
+    </tr>`;
+  }).join('');
 }
 
 // ════════════════════════════════════════════════════════════
