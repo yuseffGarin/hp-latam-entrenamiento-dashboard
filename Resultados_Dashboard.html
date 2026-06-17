@@ -348,6 +348,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
         </div>
       </div>
       <div class="chart-wrap"><canvas id="chart-pie-type"></canvas></div>
+      <div id="partner-country-btns" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px 12px 4px"></div>
     </div>
   </div>
 
@@ -772,23 +773,73 @@ function renderAll() {
   });
 
   // ── PIE: Partner trainings ─────────────────────────────────
-  const PARTNER_DATA = {
-    labels: ['Qualcomm','Intel','AMD','Microsoft','Nvidia'],
-    data:   [27, 25, 26, 5, 9],
-    colors: ['#8B1A1A','#0071C5','#CC2200','#FFB300','#5A9E1A']
+  const PARTNER_LABELS  = ['Qualcomm','Intel','AMD','Microsoft','Nvidia'];
+  const PARTNER_KEYS    = ['Q','I','A','M','N'];
+  const PARTNER_COLORS  = ['#A020F0','#0071C5','#ED1C24','#FFB900','#76B900'];
+  const PARTNER_BY_COUNTRY = {
+    'LATAM':     {Q:27, I:25, A:26, M:5,  N:9},
+    'Argentina': {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'Brasil':    {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'Chile':     {Q:27, I:25, A:26, M:5,  N:9},
+    'Colombia':  {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'Costa Rica':{Q:0,  I:0,  A:0,  M:0,  N:0},
+    'Ecuador':   {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'El Salvador':{Q:0, I:0,  A:0,  M:0,  N:0},
+    'Guatemala': {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'Honduras':  {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'México':    {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'Panamá':    {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'Perú':      {Q:0,  I:0,  A:0,  M:0,  N:0}
   };
-  const partnerTotal = PARTNER_DATA.data.reduce((s,v)=>s+v,0);
+  let partnerFilter = 'LATAM';
+
+  function getPartnerData(country) {
+    const d = PARTNER_BY_COUNTRY[country] || PARTNER_BY_COUNTRY['LATAM'];
+    return PARTNER_KEYS.map(k => d[k] || 0);
+  }
+
+  function buildPartnerBtns() {
+    const container = document.getElementById('partner-country-btns');
+    if (!container) return;
+    const countries = Object.keys(PARTNER_BY_COUNTRY);
+    container.innerHTML = countries.map(c => {
+      const active = c === partnerFilter;
+      const hasData = c === 'LATAM' || Object.values(PARTNER_BY_COUNTRY[c]).some(v=>v>0);
+      return `<button onclick="setPartnerFilter('${c}')"
+        style="font-size:10px;padding:3px 10px;border-radius:12px;border:1.5px solid ${active?'#0047AB':'#ccd6e8'};
+               background:${active?'#0047AB':'#f0f4fa'};color:${active?'#fff':'#445'};
+               font-weight:${active?'700':'500'};cursor:pointer;opacity:${hasData?1:0.45};
+               transition:all .15s">${c}</button>`;
+    }).join('');
+  }
+
+  window.setPartnerFilter = function(country) {
+    partnerFilter = country;
+    buildPartnerBtns();
+    const data = getPartnerData(country);
+    const total = data.reduce((s,v)=>s+v,0) || 1;
+    const ch = charts['chart-pie-type'];
+    if (ch) {
+      ch.data.datasets[0].data = data;
+      ch.options.plugins.tooltip.callbacks.label = c => `${c.label}: ${c.raw} (${((c.raw/total)*100).toFixed(1)}%)`;
+      ch.update();
+    }
+  };
+
+  const _initPartnerData = getPartnerData('LATAM');
+  const _initPartnerTotal = _initPartnerData.reduce((s,v)=>s+v,0) || 1;
   makeChart('chart-pie-type',{
     type:'doughnut',
     data:{
-      labels: PARTNER_DATA.labels,
-      datasets:[{data: PARTNER_DATA.data,
-                 backgroundColor: PARTNER_DATA.colors,
+      labels: PARTNER_LABELS,
+      datasets:[{data: _initPartnerData,
+                 backgroundColor: PARTNER_COLORS,
                  borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.3,
       plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:12}},
-               tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${((c.raw/partnerTotal)*100).toFixed(1)}%)`}}}}
+               tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${((c.raw/_initPartnerTotal)*100).toFixed(1)}%)`}}}}
   });
+  buildPartnerBtns();
 
   // ── PRODUCT BAR ────────────────────────────────────────────
   const activeProds = state.products;
