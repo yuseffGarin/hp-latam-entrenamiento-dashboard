@@ -1635,4 +1635,11 @@ setInterval(updateCountdown, 1000);
     el.textContent = text;
     el.style.display = 'block';
     el.style.background = type==='ok' ? 'rgba(0,200,100,0.15)' : 'rgba(239,51,36,0.15)';
-    el.style.border = `1px s
+    el.style.border = `1px solid ${type==='ok'?'rgba(0,200,100,0.4)':'rgba(239,51,36,0.4)'}`;
+    setTimeout(()=>{ el.style.display='none'; }, 4000);
+  }
+
+})();
+</script>
+</body>
+</html>
