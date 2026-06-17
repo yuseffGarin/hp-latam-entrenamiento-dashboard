@@ -151,6 +151,8 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 .region-name{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px}
 .region-total{font-size:26px;font-weight:800;color:var(--text);margin:4px 0;font-family:Arial,sans-serif}
 .region-countries{font-size:9px;color:var(--text-muted)}
+.region-flag-single{font-size:28px;line-height:1;margin:4px 0 2px}
+.region-flag-strip{display:flex;justify-content:center;flex-wrap:wrap;gap:3px;margin:4px 0 2px;font-size:18px;line-height:1}
 
 /* ── PROGRESS BARS ── */
 .progress-list{display:flex;flex-direction:column;gap:10px}
@@ -600,18 +602,27 @@ function renderAll() {
   const regionMap = {};
   const regionColors = {'CACE':'cac','Colombia':'colombia','Perú':'peru','Chile':'chile','Argentina':'argentina','Brasil':'brasil','México':'mexico'};
   countries.forEach(c => {
-    if (!regionMap[c.region]) regionMap[c.region] = {total:0, countries:[]};
+    if (!regionMap[c.region]) regionMap[c.region] = {total:0, countries:[], flags:[]};
     regionMap[c.region].total += getTotal(c);
-    if (!regionMap[c.region].countries.includes(c.country))
+    if (!regionMap[c.region].countries.includes(c.country)) {
       regionMap[c.region].countries.push(c.country);
+      regionMap[c.region].flags.push(c.flag);
+    }
   });
   const rc = document.getElementById('region-cards');
-  rc.innerHTML = Object.entries(regionMap).sort((a,b)=>b[1].total-a[1].total).map(([r,d])=>`
+  rc.innerHTML = Object.entries(regionMap).sort((a,b)=>b[1].total-a[1].total).map(([r,d])=>{
+    const isSingle = d.flags.length === 1;
+    const flagHtml = isSingle
+      ? `<div class="region-flag-single">${d.flags[0]}</div>`
+      : `<div class="region-flag-strip">${d.flags.map(f=>`<span>${f}</span>`).join('')}</div>`;
+    return `
     <div class="region-card ${regionColors[r]||'cac'}">
       <div class="region-name">${r}</div>
+      ${flagHtml}
       <div class="region-total">${d.total}</div>
       <div class="region-countries">${d.countries.join(' · ')}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // ── STACKED BAR: Country x Type ───────────────────────────
   const stackedLabels = countries.map(c=>c.country);
