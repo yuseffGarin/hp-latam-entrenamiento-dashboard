@@ -343,8 +343,8 @@ select.filter-select:focus{border-color:var(--hp-blue)}
     <div class="chart-card">
       <div class="chart-head">
         <div>
-          <div class="chart-name">Distribución por Tipo</div>
-          <div class="chart-detail">Proporción de cada actividad</div>
+          <div class="chart-name">Entrenamientos Partner</div>
+          <div class="chart-detail">Proporción por fabricante</div>
         </div>
       </div>
       <div class="chart-wrap"><canvas id="chart-pie-type"></canvas></div>
@@ -771,17 +771,23 @@ function renderAll() {
               y:{stacked:true,ticks:{font:{size:10}}}}}
   });
 
-  // ── PIE: Activity type ─────────────────────────────────────
+  // ── PIE: Partner trainings ─────────────────────────────────
+  const PARTNER_DATA = {
+    labels: ['Qualcomm','Intel','AMD','Microsoft','Nvidia'],
+    data:   [27, 25, 26, 5, 9],
+    colors: ['#CC0000','#0071C5','#ED1C24','#FFB900','#76B900']
+  };
+  const partnerTotal = PARTNER_DATA.data.reduce((s,v)=>s+v,0);
   makeChart('chart-pie-type',{
     type:'doughnut',
     data:{
-      labels: RAW.actKeys.map(a=>RAW.actLabels[a]),
-      datasets:[{data:RAW.actKeys.map(a=>actTotal(a)),
-                 backgroundColor:RAW.actKeys.map(a=>ACT_COLORS[a]),
+      labels: PARTNER_DATA.labels,
+      datasets:[{data: PARTNER_DATA.data,
+                 backgroundColor: PARTNER_DATA.colors,
                  borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.3,
       plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:12}},
-               tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${((c.raw/gt)*100).toFixed(1)}%)`}}}}
+               tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${((c.raw/partnerTotal)*100).toFixed(1)}%)`}}}}
   });
 
   // ── PRODUCT BAR ────────────────────────────────────────────
