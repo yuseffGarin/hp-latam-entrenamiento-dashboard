@@ -616,22 +616,22 @@ Chart.register({
     const ctx = chart.ctx;
     const yAxis = chart.scales.y;
     if (!yAxis) return;
-    const FW = 26, FH = 17, GAP = 5;
-    const pad = yAxis.options?.ticks?.padding ?? 4;
+    const FW = 26, FH = 17, GAP = 6;
+    const FX = yAxis.left + 4;   // todas las banderas en la misma X (alineadas a la izquierda)
+    const TX = FX + FW + GAP;    // texto empieza siempre justo después
     yAxis.ticks.forEach((tick, i) => {
       const label = Array.isArray(tick.label) ? tick.label[0] : tick.label;
-      const img = FLAG_IMG_OBJS[label];
-      if (!img) return;
       const y = yAxis.getPixelForTick(i);
       ctx.save();
+      // bandera
+      const img = FLAG_IMG_OBJS[label];
+      if (img) ctx.drawImage(img, FX, y - FH / 2, FW, FH);
+      // texto propio (las etiquetas de Chart.js se ocultan con color transparent)
       ctx.font = '600 10px Arial';
-      const textW = ctx.measureText(label).width;
-      const labelRightX = yAxis.right - pad;
-      const labelLeftX  = labelRightX - textW;
-      const fx = labelLeftX - GAP - FW;
-      if (fx >= yAxis.left) {
-        ctx.drawImage(img, fx, y - FH / 2, FW, FH);
-      }
+      ctx.fillStyle = '#555555';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.fillText(label || '', TX, y);
       ctx.restore();
     });
   }
@@ -874,8 +874,8 @@ function renderAll() {
       scales:{
         x:{beginAtZero:true,ticks:{font:{size:10}}},
         y:{
-          afterFit(axis){ axis.width = Math.max(axis.width, axis.width + 36); },
-          ticks:{font:{size:10},padding:4}
+          afterFit(axis){ axis.width = Math.max(axis.width, 120); },
+          ticks:{font:{size:10},padding:4,color:'transparent'}
         }
       }}
   });
