@@ -1055,10 +1055,15 @@ function renderAll() {
       <td style="color:${PROD_COLORS.Print}">${t.Print}</td>
       <td style="color:${PROD_COLORS.Gaming}">${t.Gaming}</td>
       <td><span class="total-col">${t.TOTAL}</span></td>
-      <td style="min-width:280px"><div class="act-donut">
-        ${donutSvg}<div><div class="act-donut-label">Entrenador<br>vs LATAM</div><div class="act-donut-pct">${pctDisplay}%</div></div>
-        <div style="width:1px;background:var(--border);align-self:stretch;margin:2px 10px"></div>
-        ${countryDonutSvg}<div><div class="act-donut-label" style="color:#b35c00">${t.country}<br>vs LATAM</div><div class="act-donut-pct" style="color:#FF8900">${cPctDisplay}%</div></div>
+      <td style="min-width:160px"><div style="display:flex;gap:6px;align-items:flex-start;justify-content:center">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          ${donutSvg}
+          <div style="font-size:7.5px;color:#0047AB;font-weight:700;text-align:center;line-height:1.2;white-space:nowrap">Entrenador<br>vs LATAM</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          ${countryDonutSvg}
+          <div style="font-size:7.5px;color:#b35c00;font-weight:700;text-align:center;line-height:1.2;white-space:nowrap">${t.country}<br>vs LATAM</div>
+        </div>
       </div></td>
     </tr>`;
   }).join('');
