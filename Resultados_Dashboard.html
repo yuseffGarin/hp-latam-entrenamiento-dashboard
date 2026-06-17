@@ -960,7 +960,7 @@ function renderAll() {
   document.getElementById('trainer-body').innerHTML = allTrainers.map(t=>`
     <tr>
       <td style="font-weight:600">${t.name}</td>
-      <td>${t.country}</td>
+      <td style="white-space:nowrap"><img src="${FLAG_IMGS[t.country]||''}" style="width:22px;height:14px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:6px;flex-shrink:0">${t.country}</td>
       <td><span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--hp-light);color:var(--hp-dark);font-weight:600">${t.region}</span></td>
       <td style="color:${PROD_COLORS.Computo}">${t.Computo}</td>
       <td style="color:${PROD_COLORS.Print}">${t.Print}</td>
