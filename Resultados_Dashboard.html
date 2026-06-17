@@ -287,6 +287,17 @@ select.filter-select:focus{border-color:var(--hp-blue)}
   <div class="topbar-right">
     <div class="topbar-badge">LIVE DATA</div>
     <div class="last-update">Actualizando...</div>
+
+    <!-- PRESENCE PANEL -->
+    <div id="presence-panel" style="display:none;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 10px;cursor:default" title="Usuarios activos en el dashboard">
+      <!-- status dot -->
+      <span style="display:inline-block;width:7px;height:7px;background:#00D072;border-radius:50%;box-shadow:0 0 6px #00D072;flex-shrink:0"></span>
+      <span style="color:rgba(255,255,255,0.5);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap">En línea</span>
+      <!-- avatars container -->
+      <div id="presence-avatars" style="display:flex;gap:3px;align-items:center"></div>
+      <span id="presence-count" style="color:rgba(255,255,255,0.35);font-size:10px"></span>
+    </div>
+
     <div id="topbar-user" style="display:none;align-items:center;gap:10px">
       <span id="topbar-username" style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:600"></span>
       <button id="btn-user-mgmt" onclick="openUserMgmt()" style="display:none;background:rgba(0,150,214,0.2);border:1px solid rgba(0,150,214,0.5);color:#fff;padding:4px 10px;border-radius:2px;font-size:11px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif">⚙️ Usuarios</button>
@@ -1366,6 +1377,64 @@ setInterval(updateCountdown, 1000);
   function setSession(u, role) { sessionStorage.setItem(SESSION_KEY, JSON.stringify({username: u, role})); }
   function clearSession() { sessionStorage.removeItem(SESSION_KEY); }
 
+  // ── PRESENCE SYSTEM ─────────────────────────────────────────
+  const PRESENCE_KEY = 'hp_dash_presence';
+  const PRESENCE_TTL = 3 * 60 * 1000; // 3 minutes = active
+
+  function updatePresence(username) {
+    try {
+      const data = JSON.parse(localStorage.getItem(PRESENCE_KEY) || '{}');
+      data[username] = Date.now();
+      localStorage.setItem(PRESENCE_KEY, JSON.stringify(data));
+    } catch(e) {}
+  }
+
+  function getActivePresence() {
+    try {
+      const data = JSON.parse(localStorage.getItem(PRESENCE_KEY) || '{}');
+      const now = Date.now();
+      return Object.entries(data)
+        .filter(([, ts]) => now - ts < PRESENCE_TTL)
+        .map(([u, ts]) => ({ user: u, ts }))
+        .sort((a, b) => b.ts - a.ts);
+    } catch(e) { return []; }
+  }
+
+  function removePresence(username) {
+    try {
+      const data = JSON.parse(localStorage.getItem(PRESENCE_KEY) || '{}');
+      delete data[username];
+      localStorage.setItem(PRESENCE_KEY, JSON.stringify(data));
+    } catch(e) {}
+  }
+
+  const AVATAR_COLORS = ['#0096D6','#A020F0','#00D072','#FFB900','#ED1C24','#FF8900','#0249D6'];
+  function avatarColor(name) {
+    let h = 0; for (let c of name) h = (h * 31 + c.charCodeAt(0)) % AVATAR_COLORS.length;
+    return AVATAR_COLORS[h];
+  }
+
+  function renderPresence(currentUser) {
+    const active = getActivePresence();
+    const panel = document.getElementById('presence-panel');
+    const avatarsEl = document.getElementById('presence-avatars');
+    const countEl = document.getElementById('presence-count');
+    if (!panel) return;
+    panel.style.display = active.length ? 'flex' : 'none';
+    const MAX_SHOW = 4;
+    const shown = active.slice(0, MAX_SHOW);
+    const extra = active.length - MAX_SHOW;
+    avatarsEl.innerHTML = shown.map(({user}) => {
+      const isCurrent = user === currentUser;
+      const initials = user.substring(0, 2).toUpperCase();
+      const color = avatarColor(user);
+      const minsSince = Math.floor((Date.now() - (getActivePresence().find(p=>p.user===user)?.ts||Date.now())) / 60000);
+      const label = isCurrent ? 'Tú (activo ahora)' : `${user} · activo hace ${minsSince < 1 ? '<1' : minsSince} min`;
+      return `<div title="${label}" style="width:24px;height:24px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;border:2px solid ${isCurrent?'#fff':'rgba(255,255,255,0.2)'};flex-shrink:0;cursor:default">${initials}</div>`;
+    }).join('');
+    countEl.textContent = extra > 0 ? `+${extra}` : '';
+  }
+
   // Show/hide overlay
   function showDashboard(username, role) {
     document.getElementById('auth-overlay').style.display = 'none';
@@ -1373,12 +1442,19 @@ setInterval(updateCountdown, 1000);
     topbarUser.style.display = 'flex';
     document.getElementById('topbar-username').textContent = '👤 ' + username;
     if (role === 'admin') document.getElementById('btn-user-mgmt').style.display = 'inline-block';
+    // Start presence
+    updatePresence(username);
+    renderPresence(username);
+    setInterval(() => { updatePresence(username); renderPresence(username); }, 30000);
   }
 
   // Check existing session on load
   const session = getSession();
   if (session && getUsers()[session.username]) {
     showDashboard(session.username, session.role);
+  } else {
+    // Show any recently active users even before login (teaser)
+    renderPresence(null);
   }
 
   // Login
@@ -1400,9 +1476,12 @@ setInterval(updateCountdown, 1000);
 
   // Logout
   window.authLogout = function() {
+    const session = getSession();
+    if (session) removePresence(session.username);
     clearSession();
     document.getElementById('topbar-user').style.display = 'none';
     document.getElementById('btn-user-mgmt').style.display = 'none';
+    document.getElementById('presence-panel').style.display = 'none';
     document.getElementById('auth-overlay').style.display = 'flex';
     document.getElementById('auth-user').value = '';
     document.getElementById('auth-pass').value = '';
