@@ -187,6 +187,94 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 </head>
 <body>
 
+<!-- ══════════════════════════════════════════════════════════
+     AUTH OVERLAY
+══════════════════════════════════════════════════════════ -->
+<div id="auth-overlay" style="position:fixed;inset:0;background:linear-gradient(135deg,#0a1628 0%,#0e2841 60%,#0d1f3c 100%);z-index:9999;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif">
+  <div style="width:100%;max-width:420px;padding:0 20px">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:linear-gradient(135deg,#0096D6,#0249D6);border-radius:50%;margin-bottom:16px;box-shadow:0 0 40px rgba(0,150,214,0.4)">
+        <span style="font-weight:900;font-size:28px;color:#fff;letter-spacing:-2px;font-family:Arial,sans-serif">hp</span>
+      </div>
+      <div style="color:#fff;font-size:20px;font-weight:700;letter-spacing:0.5px">Acceso de Usuario</div>
+      <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:4px">Dashboard Entrenamiento LATAM · Q3FY2026</div>
+    </div>
+
+    <!-- Login form -->
+    <div id="auth-login-panel">
+      <div id="auth-error" style="display:none;background:rgba(239,51,36,0.15);border:1px solid rgba(239,51,36,0.4);color:#ff6b5b;padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:14px;text-align:center"></div>
+      <div style="position:relative;margin-bottom:12px">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);font-size:16px">👤</span>
+        <input id="auth-user" type="text" placeholder="Nombre de Usuario" autocomplete="username"
+          style="width:100%;padding:14px 14px 14px 44px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:14px;outline:none;font-family:Arial,sans-serif;transition:border .2s"
+          onfocus="this.style.borderColor='#0096D6'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+          onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()"/>
+      </div>
+      <div style="position:relative;margin-bottom:8px">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);font-size:16px">🔒</span>
+        <input id="auth-pass" type="password" placeholder="Contraseña" autocomplete="current-password"
+          style="width:100%;padding:14px 14px 14px 44px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:14px;outline:none;font-family:Arial,sans-serif;transition:border .2s"
+          onfocus="this.style.borderColor='#0096D6'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'"
+          onkeydown="if(event.key==='Enter')authLogin()"/>
+      </div>
+      <button onclick="authLogin()"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#0096D6,#0249D6);border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1.5px;margin-top:8px;transition:opacity .2s;font-family:Arial,sans-serif"
+        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">ACCEDER</button>
+      <div style="text-align:center;margin-top:20px">
+        <span style="color:rgba(255,255,255,0.35);font-size:12px">¿No tienes acceso? Contacta al administrador.</span>
+      </div>
+    </div>
+
+    <!-- Admin: create account panel (hidden by default) -->
+    <div id="auth-create-panel" style="display:none">
+      <div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:16px;text-align:center">Crear Nueva Cuenta</div>
+      <div id="auth-create-msg" style="display:none;padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:14px;text-align:center"></div>
+      <input id="new-username" type="text" placeholder="Nombre de Usuario" autocomplete="off"
+        style="width:100%;padding:12px 14px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:14px;outline:none;margin-bottom:10px;font-family:Arial,sans-serif"/>
+      <input id="new-password" type="password" placeholder="Contraseña" autocomplete="new-password"
+        style="width:100%;padding:12px 14px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:14px;outline:none;margin-bottom:10px;font-family:Arial,sans-serif"/>
+      <select id="new-role"
+        style="width:100%;padding:12px 14px;background:#1a2d45;border:1.5px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-size:14px;outline:none;margin-bottom:16px;font-family:Arial,sans-serif">
+        <option value="viewer">Viewer — Solo lectura</option>
+        <option value="admin">Admin — Gestión de usuarios</option>
+      </select>
+      <button onclick="authCreateUser()"
+        style="width:100%;padding:13px;background:linear-gradient(135deg,#0096D6,#0249D6);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;margin-bottom:10px">CREAR CUENTA</button>
+      <button onclick="showLoginPanel()"
+        style="width:100%;padding:13px;background:transparent;border:1.5px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.6);font-size:14px;cursor:pointer;font-family:Arial,sans-serif">← Volver</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER MGMT MODAL -->
+<div id="user-mgmt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:8000;align-items:center;justify-content:center;font-family:Arial,sans-serif">
+  <div style="background:#0e2841;border-radius:12px;padding:28px;width:90%;max-width:520px;max-height:80vh;overflow-y:auto;border:1px solid rgba(0,150,214,0.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="color:#fff;font-size:17px;font-weight:700">⚙️ Gestión de Usuarios</div>
+      <button onclick="document.getElementById('user-mgmt-modal').style.display='none'"
+        style="background:transparent;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <!-- New user quick form -->
+    <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:16px;margin-bottom:20px">
+      <div style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Nueva Cuenta</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="mgmt-user" type="text" placeholder="Usuario" style="flex:1;min-width:120px;padding:9px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#fff;font-size:13px;outline:none;font-family:Arial,sans-serif"/>
+        <input id="mgmt-pass" type="password" placeholder="Contraseña" style="flex:1;min-width:120px;padding:9px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#fff;font-size:13px;outline:none;font-family:Arial,sans-serif"/>
+        <select id="mgmt-role" style="padding:9px 12px;background:#1a2d45;border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#fff;font-size:13px;outline:none;font-family:Arial,sans-serif">
+          <option value="viewer">Viewer</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button onclick="mgmtCreateUser()" style="padding:9px 16px;background:#0096D6;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif">+ Crear</button>
+      </div>
+      <div id="mgmt-msg" style="display:none;margin-top:8px;font-size:12px;padding:6px 10px;border-radius:4px"></div>
+    </div>
+    <!-- User list -->
+    <div style="color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Usuarios Registrados</div>
+    <div id="user-list"></div>
+  </div>
+</div>
+
 <!-- TOP BAR -->
 <nav class="topbar">
   <div class="topbar-logo">
@@ -199,6 +287,11 @@ select.filter-select:focus{border-color:var(--hp-blue)}
   <div class="topbar-right">
     <div class="topbar-badge">LIVE DATA</div>
     <div class="last-update">Actualizando...</div>
+    <div id="topbar-user" style="display:none;align-items:center;gap:10px">
+      <span id="topbar-username" style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:600"></span>
+      <button id="btn-user-mgmt" onclick="openUserMgmt()" style="display:none;background:rgba(0,150,214,0.2);border:1px solid rgba(0,150,214,0.5);color:#fff;padding:4px 10px;border-radius:2px;font-size:11px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif">⚙️ Usuarios</button>
+      <button onclick="authLogout()" style="background:rgba(239,51,36,0.2);border:1px solid rgba(239,51,36,0.4);color:#ff8f7e;padding:4px 10px;border-radius:2px;font-size:11px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif">Cerrar Sesión</button>
+    </div>
     <button id="refresh-countdown" onclick="location.reload()" title="Recargar ahora" style="background:rgba(0,150,214,0.2);border:1px solid rgba(0,150,214,0.5);color:#fff;padding:4px 12px;border-radius:2px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:background 0.2s;font-family:Arial,sans-serif" onmouseover="this.style.background='rgba(0,150,214,0.4)'" onmouseout="this.style.background='rgba(0,150,214,0.2)'">↻ 05:00</button>
   </div>
 </nav>
@@ -1244,6 +1337,155 @@ function updateCountdown(){
 
 updateTimestamp();
 setInterval(updateCountdown, 1000);
+
+// ════════════════════════════════════════════════════════════
+// AUTH SYSTEM
+// ════════════════════════════════════════════════════════════
+(function initAuth() {
+  const STORE_KEY = 'hp_dash_users';
+  const SESSION_KEY = 'hp_dash_session';
+
+  // Default admin account (created on first load if no users exist)
+  function getUsers() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; }
+  }
+  function saveUsers(u) { localStorage.setItem(STORE_KEY, JSON.stringify(u)); }
+  function hashPass(p) { return btoa(unescape(encodeURIComponent(p + '_hp2026salt'))); }
+
+  // Seed default admin
+  let users = getUsers();
+  if (!Object.keys(users).length) {
+    users['admin'] = { hash: hashPass('hp2026'), role: 'admin', created: new Date().toISOString() };
+    saveUsers(users);
+  }
+
+  // Session check
+  function getSession() {
+    try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e) { return null; }
+  }
+  function setSession(u, role) { sessionStorage.setItem(SESSION_KEY, JSON.stringify({username: u, role})); }
+  function clearSession() { sessionStorage.removeItem(SESSION_KEY); }
+
+  // Show/hide overlay
+  function showDashboard(username, role) {
+    document.getElementById('auth-overlay').style.display = 'none';
+    const topbarUser = document.getElementById('topbar-user');
+    topbarUser.style.display = 'flex';
+    document.getElementById('topbar-username').textContent = '👤 ' + username;
+    if (role === 'admin') document.getElementById('btn-user-mgmt').style.display = 'inline-block';
+  }
+
+  // Check existing session on load
+  const session = getSession();
+  if (session && getUsers()[session.username]) {
+    showDashboard(session.username, session.role);
+  }
+
+  // Login
+  window.authLogin = function() {
+    const u = document.getElementById('auth-user').value.trim();
+    const p = document.getElementById('auth-pass').value;
+    const errEl = document.getElementById('auth-error');
+    const users = getUsers();
+    if (!u || !p) { errEl.textContent = 'Ingresa usuario y contraseña.'; errEl.style.display='block'; return; }
+    if (users[u] && users[u].hash === hashPass(p)) {
+      setSession(u, users[u].role);
+      showDashboard(u, users[u].role);
+    } else {
+      errEl.textContent = 'Usuario o contraseña incorrectos.';
+      errEl.style.display = 'block';
+      document.getElementById('auth-pass').value = '';
+    }
+  };
+
+  // Logout
+  window.authLogout = function() {
+    clearSession();
+    document.getElementById('topbar-user').style.display = 'none';
+    document.getElementById('btn-user-mgmt').style.display = 'none';
+    document.getElementById('auth-overlay').style.display = 'flex';
+    document.getElementById('auth-user').value = '';
+    document.getElementById('auth-pass').value = '';
+    document.getElementById('auth-error').style.display = 'none';
+    showLoginPanel();
+  };
+
+  // Panel switching
+  window.showLoginPanel = function() {
+    document.getElementById('auth-login-panel').style.display = 'block';
+    document.getElementById('auth-create-panel').style.display = 'none';
+  };
+
+  // Create user (from login screen — only accessible if already admin)
+  window.authCreateUser = function() {
+    const u = document.getElementById('new-username').value.trim();
+    const p = document.getElementById('new-password').value;
+    const role = document.getElementById('new-role').value;
+    const msg = document.getElementById('auth-create-msg');
+    if (!u || !p) { showMsg(msg,'Completa todos los campos.','error'); return; }
+    const users = getUsers();
+    if (users[u]) { showMsg(msg,'Ese usuario ya existe.','error'); return; }
+    users[u] = { hash: hashPass(p), role, created: new Date().toISOString() };
+    saveUsers(users);
+    showMsg(msg, `✓ Cuenta "${u}" creada.`, 'ok');
+    document.getElementById('new-username').value = '';
+    document.getElementById('new-password').value = '';
+  };
+
+  // User management modal
+  window.openUserMgmt = function() {
+    const modal = document.getElementById('user-mgmt-modal');
+    modal.style.display = 'flex';
+    renderUserList();
+  };
+
+  function renderUserList() {
+    const users = getUsers();
+    const el = document.getElementById('user-list');
+    const session = getSession();
+    el.innerHTML = Object.entries(users).map(([name, data]) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,0.05);border-radius:6px;margin-bottom:6px">
+        <div>
+          <span style="color:#fff;font-size:13px;font-weight:600">👤 ${name}</span>
+          <span style="margin-left:8px;font-size:10px;padding:2px 8px;border-radius:10px;background:${data.role==='admin'?'rgba(0,150,214,0.3)':'rgba(255,255,255,0.1)'};color:${data.role==='admin'?'#0096D6':'rgba(255,255,255,0.5)'};font-weight:700">${data.role.toUpperCase()}</span>
+        </div>
+        ${name !== session?.username ? `<button onclick="mgmtDeleteUser('${name}')" style="background:rgba(239,51,36,0.2);border:1px solid rgba(239,51,36,0.4);color:#ff8f7e;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:Arial,sans-serif">Eliminar</button>` : `<span style="color:rgba(255,255,255,0.3);font-size:11px">(tú)</span>`}
+      </div>`).join('') || '<div style="color:rgba(255,255,255,0.4);font-size:13px">No hay usuarios.</div>';
+  }
+
+  window.mgmtCreateUser = function() {
+    const u = document.getElementById('mgmt-user').value.trim();
+    const p = document.getElementById('mgmt-pass').value;
+    const role = document.getElementById('mgmt-role').value;
+    const msg = document.getElementById('mgmt-msg');
+    if (!u || !p) { showMsg(msg,'Completa todos los campos.','error'); return; }
+    const users = getUsers();
+    if (users[u]) { showMsg(msg,'Ese usuario ya existe.','error'); return; }
+    users[u] = { hash: hashPass(p), role, created: new Date().toISOString() };
+    saveUsers(users);
+    document.getElementById('mgmt-user').value = '';
+    document.getElementById('mgmt-pass').value = '';
+    showMsg(msg, `✓ Cuenta "${u}" creada correctamente.`, 'ok');
+    renderUserList();
+  };
+
+  window.mgmtDeleteUser = function(name) {
+    if (!confirm(`¿Eliminar usuario "${name}"?`)) return;
+    const users = getUsers();
+    delete users[name];
+    saveUsers(users);
+    renderUserList();
+  };
+
+  function showMsg(el, text, type) {
+    el.textContent = text;
+    el.style.display = 'block';
+    el.style.background = type==='ok' ? 'rgba(0,200,100,0.15)' : 'rgba(239,51,36,0.15)';
+    el.style.border = `1px solid ${type==='ok'?'rgba(0,200,100,0.4)':'rgba(239,51,36,0.4)'}`;
+    el.style.color = type==='ok' ? '#4ade80' : '#ff6b5b';
+    setTimeout(()=>{ el.style.display='none'; }, 3000);
+  }
+})();
 </script>
 </body>
 </html>
