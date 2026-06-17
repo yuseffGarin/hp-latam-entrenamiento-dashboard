@@ -484,6 +484,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
         </div>
       </div>
       <div class="chart-wrap"><canvas id="chart-radar"></canvas></div>
+      <div id="radar-country-btns" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;padding:8px 12px 2px"></div>
     </div>
   </div>
 
@@ -982,23 +983,70 @@ function renderAll() {
   });
 
   // ── RADAR ──────────────────────────────────────────────────
-  const radarCountries = countries.slice().sort((a,b)=>getTotal(b)-getTotal(a)).slice(0,4);
+  const RADAR_PALETTE = ['#0047AB','#FF3900','#00BCD4','#AFB42B','#A020F0','#FF8900','#00D072','#ED1C24'];
+  const COUNTRY_FLAGS = Object.fromEntries(countries.map(c=>[c.country, FLAG_IMGS[c.country]||'']));
+  // default: top 4 by total
+  let radarSelected = countries.slice().sort((a,b)=>getTotal(b)-getTotal(a)).slice(0,4).map(c=>c.country);
+
+  function buildRadarDatasets() {
+    return radarSelected.map((name,i)=>{
+      const c = countries.find(x=>x.country===name);
+      if(!c) return null;
+      const col = RADAR_PALETTE[i % RADAR_PALETTE.length];
+      return { label:name, data:RAW.actKeys.map(a=>getByAct(c,a)),
+               borderColor:col, backgroundColor:col+'28', pointRadius:4,
+               pointBackgroundColor:col, borderWidth:2.5 };
+    }).filter(Boolean);
+  }
+
+  function buildRadarBtns() {
+    const container = document.getElementById('radar-country-btns');
+    if(!container) return;
+    const allCountries = countries.slice().sort((a,b)=>getTotal(b)-getTotal(a));
+    container.innerHTML = allCountries.map(c=>{
+      const active = radarSelected.includes(c.country);
+      const idx = radarSelected.indexOf(c.country);
+      const col = active ? RADAR_PALETTE[idx % RADAR_PALETTE.length] : '#ccd6e8';
+      const flagSrc = COUNTRY_FLAGS[c.country];
+      const flagEl = flagSrc ? `<img src="${flagSrc}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:4px">` : '';
+      return `<button onclick="toggleRadarCountry('${c.country}')"
+        style="display:flex;align-items:center;font-size:11px;padding:4px 10px;border-radius:12px;
+               border:2px solid ${col};background:${active?col+'22':'#f5f7fa'};
+               color:${active?col:'#778'};font-weight:${active?'700':'500'};
+               cursor:pointer;transition:all .15s;font-family:Arial,sans-serif">${flagEl}${c.country}</button>`;
+    }).join('');
+  }
+
+  window.toggleRadarCountry = function(name) {
+    if(radarSelected.includes(name)) {
+      if(radarSelected.length <= 1) return; // keep at least 1
+      radarSelected = radarSelected.filter(x=>x!==name);
+    } else {
+      if(radarSelected.length >= 6) radarSelected.shift(); // max 6
+      radarSelected.push(name);
+    }
+    buildRadarBtns();
+    const ch = charts['chart-radar'];
+    if(ch){ ch.data.datasets = buildRadarDatasets(); ch.update(); }
+  };
+
   makeChart('chart-radar',{
     type:'radar',
     data:{
       labels: RAW.actKeys.map(a=>RAW.actLabels[a]),
-      datasets: radarCountries.map((c,i)=>({
-        label:c.country,
-        data:RAW.actKeys.map(a=>getByAct(c,a)),
-        borderColor:['#0047AB','#FF3900','#00BCD4','#AFB42B'][i],
-        backgroundColor:['#0047AB22','#FF390022','#00BCD422','#AFB42B30'][i],
-        pointRadius:3
-      }))
+      datasets: buildRadarDatasets()
     },
-    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.2,
-      plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10}}},
-      scales:{r:{ticks:{font:{size:8}},pointLabels:{font:{size:9}}}}}
+    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.1,
+      layout:{padding:{top:2,bottom:2,left:2,right:2}},
+      plugins:{legend:{display:false}},
+      scales:{r:{
+        ticks:{font:{size:9},color:'#999',backdropColor:'transparent',maxTicksLimit:5},
+        pointLabels:{font:{size:10,weight:'700'},color:'#334'},
+        grid:{color:'rgba(0,0,0,0.08)'},
+        angleLines:{color:'rgba(0,0,0,0.1)'}
+      }}}
   });
+  buildRadarBtns();
 
   // ── TRAFFIC LIGHTS ─────────────────────────────────────────
   const max = Math.max(...countries.map(c=>getTotal(c)),1);
