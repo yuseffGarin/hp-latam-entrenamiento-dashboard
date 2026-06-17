@@ -100,7 +100,8 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 .light-green{background:var(--green)}
 .light-yellow{background:var(--yellow)}
 .light-red{background:var(--red)}
-.traffic-country{font-size:12px;font-weight:600;flex:1}
+.traffic-country{font-size:12px;font-weight:600;flex:1;display:flex;align-items:center;gap:6px}
+.traffic-flag{width:22px;height:14px;object-fit:cover;border-radius:2px;flex-shrink:0}
 .traffic-val{font-size:13px;font-weight:700;color:var(--text)}
 .traffic-bar-wrap{flex:1;height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
 .traffic-bar{height:100%;border-radius:3px;transition:width .6s}
@@ -736,9 +737,10 @@ function renderAll() {
     const t = getTotal(c);
     const pct = (t/max)*100;
     const cls = t>=150?'light-green':t>=60?'light-yellow':'light-red';
+    const flagImg = FLAG_IMGS[c.country] ? `<img class="traffic-flag" src="${FLAG_IMGS[c.country]}" alt="${c.country}">` : '';
     return `<div class="traffic-row">
       <div class="traffic-light ${cls}"></div>
-      <div class="traffic-country">${c.country}</div>
+      <div class="traffic-country">${flagImg}${c.country}</div>
       <div class="traffic-bar-wrap"><div class="traffic-bar" style="width:${pct}%;background:${t>=150?'#00A85A':t>=60?'#FF8900':'#FF3900'}"></div></div>
       <div class="traffic-val">${t}</div>
     </div>`;
