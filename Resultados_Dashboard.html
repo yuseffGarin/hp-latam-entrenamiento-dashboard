@@ -1132,4 +1132,502 @@ function renderAll() {
     return `<div class="traffic-row">
       <div class="traffic-light ${cls}"></div>
       <div class="traffic-country">${flagImg}${c.country}</div>
-      <div class="traffic-bar-wrap"><div class="traffic-bar" style="width:${pct}%;background:${t>=150?'#00A85A':
+      <div class="traffic-bar-wrap"><div class="traffic-bar" style="width:${pct}%;background:${t>=150?'#00A85A':t>=60?'#FF8900':'#FF3900'}"></div></div>
+      <div class="traffic-val">${t}</div>
+    </div>`;
+  }).join('');
+
+  // ── REGION BAR ─────────────────────────────────────────────
+  const regTotals = {};
+  countries.forEach(c=>{regTotals[c.region]=(regTotals[c.region]||0)+getTotal(c);});
+  const regEntries = Object.entries(regTotals).sort((a,b)=>b[1]-a[1]);
+  makeChart('chart-region-bar',{
+    type:'bar',
+    data:{
+      labels:regEntries.map(e=>e[0]),
+      datasets:[{label:'Actividades',data:regEntries.map(e=>e[1]),
+        backgroundColor:['#6D4C41','#B584D2','#F4511E','#00897B','#AFB42B'],
+        borderRadius:6,borderWidth:0}]
+    },
+    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.4,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}
+  });
+
+  // ── PRODUCT DONUT ──────────────────────────────────────────
+  const prodTotals = RAW.products.filter(p=>state.products.includes(p)).map(p=>productTotal(p));
+  makeChart('chart-product-donut',{
+    type:'doughnut',
+    data:{
+      labels:RAW.products.filter(p=>state.products.includes(p)),
+      datasets:[{data:prodTotals,backgroundColor:RAW.products.filter(p=>state.products.includes(p)).map(p=>PROD_COLORS[p]),borderWidth:3,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.3,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}}}}
+  });
+
+  // ── PROGRESS BARS: Activities ──────────────────────────────
+  const actTots = RAW.actKeys.map(a=>({act:a,label:RAW.actLabels[a],val:actTotal(a)}));
+  actTots.sort((a,b)=>b.val-a.val);
+  const maxAct = actTots[0]?.val||1;
+  document.getElementById('progress-acts').innerHTML = actTots.map(a=>`
+    <div class="progress-item">
+      <div class="progress-label">
+        <span class="progress-name">${a.label}</span>
+        <span class="progress-pct">${a.val}</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${(a.val/maxAct)*100}%;background:${ACT_COLORS[a.act]}"></div>
+      </div>
+    </div>`).join('');
+
+  // ── GROUPED BAR: Product x Country ────────────────────────
+  const gCountries = [...countries].sort((a,b)=>getTotal(b)-getTotal(a)).slice(0,8);
+  makeChart('chart-grouped',{
+    type:'bar',
+    data:{
+      labels:gCountries.map(c=>c.country),
+      datasets: RAW.products.filter(p=>state.products.includes(p)).map(p=>({
+        label:p,
+        data:gCountries.map(c=>c.byProduct[p].TOTAL),
+        backgroundColor:PROD_COLORS[p],
+        borderRadius:4,borderWidth:0
+      }))
+    },
+    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.6,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}}},
+      scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{font:{size:10}}}}}
+  });
+
+  // ── PIE: Products ──────────────────────────────────────────
+  makeChart('chart-pie-product',{
+    type:'pie',
+    data:{
+      labels:RAW.products.filter(p=>state.products.includes(p)),
+      datasets:[{data:prodTotals,backgroundColor:RAW.products.filter(p=>state.products.includes(p)).map(p=>PROD_COLORS[p]),borderWidth:2,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.3,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}}}}
+  });
+
+  // ── HBAR: Country totals ───────────────────────────────────
+  const hbarCountries = [...countries].sort((a,b)=>getTotal(b)-getTotal(a));
+  makeChart('chart-hbar',{
+    type:'bar',
+    data:{
+      labels:hbarCountries.map(c=>c.country),
+      datasets:[{label:'Total',data:hbarCountries.map(c=>getTotal(c)),
+        backgroundColor:hbarCountries.map(c=>getTotal(c)>=200?'#0096D6':getTotal(c)>=100?'#0249D6':getTotal(c)>=60?'#FF8900':'#FF3900'),
+        borderRadius:4,borderWidth:0}]
+    },
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,aspectRatio:1.5,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{beginAtZero:true,ticks:{font:{size:10}}},
+        y:{
+          afterFit(axis){ axis.width = Math.max(axis.width, 120); },
+          ticks:{font:{size:10},padding:4,color:'transparent'}
+        }
+      }}
+  });
+
+  // ── SCATTER: Junio vs Julio per act type ────────────────────
+  const junActs = {W:51,C:118,R:155,E:113,X:492,T:183,RG:176,V:258};
+  const julActs = {W:57,C:126,R:163,E:116,X:490,T:178,RG:181,V:270};
+  makeChart('chart-scatter',{
+    type:'scatter',
+    data:{
+      datasets: RAW.actKeys.map(a=>({
+        label:RAW.actLabels[a],
+        data:[{x:junActs[a],y:julActs[a]}],
+        backgroundColor:ACT_COLORS[a],
+        pointRadius:8,pointHoverRadius:11
+      }))
+    },
+    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.4,
+      plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10}},
+               tooltip:{callbacks:{label:c=>`${c.dataset.label}: Jun ${c.parsed.x} → Jul ${c.parsed.y}`}}},
+      scales:{
+        x:{title:{display:true,text:'Junio',font:{size:10}},ticks:{font:{size:10}}},
+        y:{title:{display:true,text:'Julio',font:{size:10}},ticks:{font:{size:10}}}
+      }}
+  });
+
+  // ── TRAINER TABLE ────────────────────────────────────────────
+  const allTrainers = [];
+  const activeCountries = new Set(countries.map(c=>c.country));
+  Object.entries(TRAINER_DATA).forEach(([name, d]) => {
+    if (!activeCountries.has(d.country)) return;
+    const tr = {name, country:d.country, region:d.region};
+    RAW.products.forEach(p=>{ tr[p] = d[p] || 0; });
+    tr.TOTAL = state.products.reduce((s,p)=>s+tr[p],0);
+    allTrainers.push(tr);
+  });
+  allTrainers.sort((a,b)=> a.country.localeCompare(b.country) || b.TOTAL-a.TOTAL);
+
+  const latamTotalFull = Object.values(TRAINER_DATA).reduce((s,d)=>s+state.products.reduce((ss,p)=>ss+(d[p]||0),0),0) || 1;
+  const countryTotals = {};
+  Object.values(TRAINER_DATA).forEach(d=>{
+    const tot = state.products.reduce((ss,p)=>ss+(d[p]||0),0);
+    countryTotals[d.country] = (countryTotals[d.country]||0) + tot;
+  });
+  document.getElementById('trainer-body').innerHTML = allTrainers.map(t=>{
+    const pct = +(t.TOTAL/latamTotalFull*100).toFixed(1);
+    const pctDisplay = pct < 1 ? pct.toFixed(1) : Math.round(pct);
+    const cTot = countryTotals[t.country] || 0;
+    const cPct = +(cTot/latamTotalFull*100).toFixed(1);
+    const cPctDisplay = cPct < 1 ? cPct.toFixed(1) : Math.round(cPct);
+    const R=16, circ=2*Math.PI*R;
+    const dash=(pct/100)*circ;
+    const donutSvg=`<svg width="44" height="44" viewBox="0 0 44 44" style="flex-shrink:0">
+      <circle cx="22" cy="22" r="${R}" fill="none" stroke="#dde6f0" stroke-width="5"/>
+      <circle cx="22" cy="22" r="${R}" fill="none" stroke="#0047AB" stroke-width="5"
+        stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}"
+        transform="rotate(-90 22 22)"/>
+      <text x="22" y="26" text-anchor="middle" font-size="7.5" font-weight="700" fill="#0047AB">${pctDisplay}%</text>
+    </svg>`;
+    const cDash=(cPct/100)*circ;
+    const countryDonutSvg=`<svg width="44" height="44" viewBox="0 0 44 44" style="flex-shrink:0">
+      <circle cx="22" cy="22" r="${R}" fill="none" stroke="#ffe5cc" stroke-width="5"/>
+      <circle cx="22" cy="22" r="${R}" fill="none" stroke="#FF8900" stroke-width="5"
+        stroke-dasharray="${cDash.toFixed(1)} ${circ.toFixed(1)}"
+        transform="rotate(-90 22 22)"/>
+      <text x="22" y="26" text-anchor="middle" font-size="7.5" font-weight="700" fill="#FF8900">${cPctDisplay}%</text>
+    </svg>`;
+    return `<tr>
+      <td style="font-weight:600">${t.name}</td>
+      <td style="white-space:nowrap;text-align:left"><img src="${FLAG_IMGS[t.country]||''}" style="width:22px;height:14px;object-fit:cover;border-radius:2px;vertical-align:bottom;margin-right:6px;flex-shrink:0">${t.country}</td>
+      <td><span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--hp-light);color:var(--hp-dark);font-weight:600">${t.region}</span></td>
+      <td style="color:${PROD_COLORS.Computo}">${t.Computo}</td>
+      <td style="color:${PROD_COLORS.Print}">${t.Print}</td>
+      <td style="color:${PROD_COLORS.Gaming}">${t.Gaming}</td>
+      <td><span class="total-col">${t.TOTAL}</span></td>
+      <td style="min-width:160px"><div style="display:flex;gap:6px;align-items:flex-start;justify-content:center">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          ${donutSvg}
+          <div style="font-size:7.5px;color:#0047AB;font-weight:700;text-align:center;line-height:1.2;white-space:nowrap">Entrenador<br>vs LATAM</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          ${countryDonutSvg}
+          <div style="font-size:7.5px;color:#b35c00;font-weight:700;text-align:center;line-height:1.2;white-space:nowrap">${t.country}<br>vs LATAM</div>
+        </div>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// FILTER HANDLERS
+// ════════════════════════════════════════════════════════════
+document.querySelectorAll('[data-filter="product"]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const val = btn.dataset.val;
+    if (state.products.includes(val)) {
+      if (state.products.length === 1) return;
+      state.products = state.products.filter(p=>p!==val);
+      btn.classList.remove('active');
+    } else {
+      state.products.push(val);
+      btn.classList.add('active');
+    }
+    renderAll();
+  });
+});
+
+document.getElementById('sel-region').addEventListener('change', e=>{
+  state.region = e.target.value; renderAll();
+});
+document.getElementById('sel-mes').addEventListener('change', e=>{
+  state.mes = e.target.value; renderAll();
+});
+document.getElementById('sel-pais').addEventListener('change', e=>{
+  state.pais = e.target.value; renderAll();
+});
+
+const selPais = document.getElementById('sel-pais');
+RAW.countries.forEach(c=>{
+  const o = document.createElement('option');
+  o.value = c.country; o.textContent = c.country;
+  selPais.appendChild(o);
+});
+
+function resetFilters() {
+  state = {products:['Computo','Print','Gaming'],region:'ALL',mes:'ALL',pais:'ALL'};
+  document.querySelectorAll('[data-filter="product"]').forEach(b=>b.classList.add('active'));
+  document.getElementById('sel-region').value='ALL';
+  document.getElementById('sel-mes').value='ALL';
+  document.getElementById('sel-pais').value='ALL';
+  renderAll();
+}
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+Chart.defaults.font.family = "Arial, sans-serif";
+Chart.defaults.color = '#5A6B7A';
+Chart.defaults.plugins.legend.labels.padding = 16;
+
+(function buildFlagStrip(){
+  const strip = document.getElementById('flag-strip');
+  const regionOrder = ['CACE','Colombia','Perú','Chile','Argentina','Brasil','México'];
+  const regionColors = {
+    'CACE':'#0096D6','Colombia':'#FF8900','Perú':'#F26B43',
+    'Chile':'#00D072','Argentina':'#568392','Brasil':'#FFE137','México':'#FF3900'
+  };
+  const byRegion = {};
+  RAW.countries.forEach(c => {
+    if (!byRegion[c.region]) byRegion[c.region] = [];
+    byRegion[c.region].push(c);
+  });
+  regionOrder.forEach((reg, ri) => {
+    const cs = byRegion[reg] || [];
+    if (!cs.length) return;
+    if (ri > 0) {
+      const div = document.createElement('div');
+      div.className = 'flag-divider';
+      strip.appendChild(div);
+    }
+    const lbl = document.createElement('div');
+    lbl.className = 'flag-region-badge';
+    lbl.textContent = reg;
+    lbl.style.borderLeft = `3px solid ${regionColors[reg]}`;
+    lbl.style.paddingLeft = '5px';
+    strip.appendChild(lbl);
+    cs.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'flag-item';
+      item.title = `${c.country} — ${c.TOTAL} actividades`;
+      const flagImg = FLAG_IMGS[c.country] ? `<img src="${FLAG_IMGS[c.country]}" style="width:22px;height:14px;object-fit:cover;border-radius:2px;display:block;margin:0 auto 2px">` : '';
+      item.innerHTML = `${flagImg}<span class="flag-name">${c.country}</span><span class="flag-total">${c.TOTAL}</span>`;
+      strip.appendChild(item);
+    });
+  });
+})();
+
+renderAll();
+
+// ════════════════════════════════════════════════════════════
+// AUTO-REFRESH
+// ════════════════════════════════════════════════════════════
+const REFRESH_INTERVAL = 5 * 60;
+let countdown = REFRESH_INTERVAL;
+function pad(n){ return String(n).padStart(2,'0'); }
+function updateTimestamp(){
+  const now = new Date();
+  const ts = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const el = document.querySelector('.last-update');
+  if(el) el.textContent = `Actualizado: ${ts}`;
+}
+function updateCountdown(){
+  countdown--;
+  if(countdown <= 0){ return; }
+  const mins = Math.floor(countdown/60);
+  const secs = countdown % 60;
+  const el = document.getElementById('refresh-countdown');
+  if(el) el.textContent = `↻ ${pad(mins)}:${pad(secs)}`;
+}
+updateTimestamp();
+setInterval(updateCountdown, 1000);
+
+// ════════════════════════════════════════════════════════════
+// AUTH SYSTEM
+// ════════════════════════════════════════════════════════════
+(function initAuth() {
+  const STORE_KEY = 'hp_dash_users';
+  const SESSION_KEY = 'hp_dash_session';
+
+  function getUsers() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; }
+  }
+  function saveUsers(u) { localStorage.setItem(STORE_KEY, JSON.stringify(u)); }
+  function hashPass(p) { return btoa(unescape(encodeURIComponent(p + '_hp2026salt'))); }
+
+  let users = getUsers();
+  if (!Object.keys(users).length) {
+    users['admin'] = { hash: hashPass('hp2026'), role: 'admin', created: new Date().toISOString() };
+    saveUsers(users);
+  }
+
+  function getSession() {
+    try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e) { return null; }
+  }
+  function setSession(u, role) { sessionStorage.setItem(SESSION_KEY, JSON.stringify({username: u, role})); }
+  function clearSession() { sessionStorage.removeItem(SESSION_KEY); }
+
+  const PRESENCE_KEY = 'hp_dash_presence';
+  const PRESENCE_TTL = 3 * 60 * 1000;
+
+  function updatePresence(username) {
+    try {
+      const data = JSON.parse(localStorage.getItem(PRESENCE_KEY) || '{}');
+      data[username] = Date.now();
+      localStorage.setItem(PRESENCE_KEY, JSON.stringify(data));
+    } catch(e) {}
+  }
+  function getActivePresence() {
+    try {
+      const data = JSON.parse(localStorage.getItem(PRESENCE_KEY) || '{}');
+      const now = Date.now();
+      return Object.entries(data)
+        .filter(([, ts]) => now - ts < PRESENCE_TTL)
+        .map(([u, ts]) => ({ user: u, ts }))
+        .sort((a, b) => b.ts - a.ts);
+    } catch(e) { return []; }
+  }
+  function removePresence(username) {
+    try {
+      const data = JSON.parse(localStorage.getItem(PRESENCE_KEY) || '{}');
+      delete data[username];
+      localStorage.setItem(PRESENCE_KEY, JSON.stringify(data));
+    } catch(e) {}
+  }
+
+  const AVATAR_COLORS = ['#0096D6','#A020F0','#00D072','#FFB900','#ED1C24','#FF8900','#0249D6'];
+  function avatarColor(name) {
+    let h = 0; for (let c of name) h = (h * 31 + c.charCodeAt(0)) % AVATAR_COLORS.length;
+    return AVATAR_COLORS[h];
+  }
+
+  function renderPresence(currentUser) {
+    const active = getActivePresence();
+    const panel = document.getElementById('presence-panel');
+    const avatarsEl = document.getElementById('presence-avatars');
+    const countEl = document.getElementById('presence-count');
+    if (!panel) return;
+    panel.style.display = active.length ? 'flex' : 'none';
+    const MAX_SHOW = 4;
+    const shown = active.slice(0, MAX_SHOW);
+    const extra = active.length - MAX_SHOW;
+    avatarsEl.innerHTML = shown.map(({user}) => {
+      const isCurrent = user === currentUser;
+      const initials = user.substring(0, 2).toUpperCase();
+      const color = avatarColor(user);
+      return `<div title="${user}" style="width:24px;height:24px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;border:2px solid ${isCurrent?'#fff':'rgba(255,255,255,0.2)'};flex-shrink:0;cursor:default">${initials}</div>`;
+    }).join('');
+    countEl.textContent = extra > 0 ? `+${extra}` : '';
+  }
+
+  function showDashboard(username, role) {
+    document.getElementById('auth-overlay').style.display = 'none';
+    const topbarUser = document.getElementById('topbar-user');
+    topbarUser.style.display = 'flex';
+    document.getElementById('topbar-username').textContent = username;
+    if (role === 'admin') document.getElementById('btn-user-mgmt').style.display = 'inline-block';
+    updatePresence(username);
+    renderPresence(username);
+    setInterval(() => { updatePresence(username); renderPresence(username); }, 30000);
+  }
+
+  const session = getSession();
+  if (session && getUsers()[session.username]) {
+    showDashboard(session.username, session.role);
+  } else {
+    renderPresence(null);
+  }
+
+  window.authLogin = function() {
+    const u = document.getElementById('auth-user').value.trim();
+    const p = document.getElementById('auth-pass').value;
+    const errEl = document.getElementById('auth-error');
+    const users = getUsers();
+    if (!u || !p) { errEl.textContent = 'Ingresa usuario y contraseña.'; errEl.style.display='block'; return; }
+    if (users[u] && users[u].hash === hashPass(p)) {
+      setSession(u, users[u].role);
+      showDashboard(u, users[u].role);
+    } else {
+      errEl.textContent = 'Usuario o contraseña incorrectos.';
+      errEl.style.display = 'block';
+      document.getElementById('auth-pass').value = '';
+    }
+  };
+
+  window.authLogout = function() {
+    const session = getSession();
+    if (session) removePresence(session.username);
+    clearSession();
+    document.getElementById('topbar-user').style.display = 'none';
+    document.getElementById('btn-user-mgmt').style.display = 'none';
+    document.getElementById('presence-panel').style.display = 'none';
+    document.getElementById('auth-overlay').style.display = 'flex';
+    document.getElementById('auth-user').value = '';
+    document.getElementById('auth-pass').value = '';
+    document.getElementById('auth-error').style.display = 'none';
+    showLoginPanel();
+  };
+
+  window.showLoginPanel = function() {
+    document.getElementById('auth-login-panel').style.display = 'block';
+    document.getElementById('auth-create-panel').style.display = 'none';
+  };
+
+  window.authCreateUser = function() {
+    const u = document.getElementById('new-username').value.trim();
+    const p = document.getElementById('new-password').value;
+    const role = document.getElementById('new-role').value;
+    const msg = document.getElementById('auth-create-msg');
+    if (!u || !p) { showMsg(msg,'Completa todos los campos.','error'); return; }
+    const users = getUsers();
+    if (users[u]) { showMsg(msg,'Ese usuario ya existe.','error'); return; }
+    users[u] = { hash: hashPass(p), role, created: new Date().toISOString() };
+    saveUsers(users);
+    showMsg(msg, `✓ Cuenta "${u}" creada.`, 'ok');
+    document.getElementById('new-username').value = '';
+    document.getElementById('new-password').value = '';
+  };
+
+  window.openUserMgmt = function() {
+    const modal = document.getElementById('user-mgmt-modal');
+    modal.style.display = 'flex';
+    renderUserList();
+  };
+
+  function renderUserList() {
+    const users = getUsers();
+    const el = document.getElementById('user-list');
+    const session = getSession();
+    el.innerHTML = Object.entries(users).map(([name, data]) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,0.05);border-radius:6px;margin-bottom:6px">
+        <div>
+          <span style="color:#fff;font-size:13px;font-weight:600">👤 ${name}</span>
+          <span style="margin-left:8px;font-size:10px;padding:2px 8px;border-radius:10px;background:${data.role==='admin'?'rgba(0,150,214,0.3)':'rgba(255,255,255,0.1)'};color:${data.role==='admin'?'#0096D6':'rgba(255,255,255,0.5)'};font-weight:700">${data.role.toUpperCase()}</span>
+        </div>
+        ${name !== session?.username ? `<button onclick="mgmtDeleteUser('${name}')" style="background:rgba(239,51,36,0.2);border:1px solid rgba(239,51,36,0.4);color:#ff8f7e;padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;font-family:Arial,sans-serif">Eliminar</button>` : `<span style="color:rgba(255,255,255,0.3);font-size:11px">(tú)</span>`}
+      </div>`).join('') || '<div style="color:rgba(255,255,255,0.4);font-size:13px">No hay usuarios.</div>';
+  }
+
+  window.mgmtCreateUser = function() {
+    const u = document.getElementById('mgmt-user').value.trim();
+    const p = document.getElementById('mgmt-pass').value;
+    const role = document.getElementById('mgmt-role').value;
+    const msg = document.getElementById('mgmt-msg');
+    if (!u || !p) { showMsg(msg,'Completa todos los campos.','error'); return; }
+    const users = getUsers();
+    if (users[u]) { showMsg(msg,'Ese usuario ya existe.','error'); return; }
+    users[u] = { hash: hashPass(p), role, created: new Date().toISOString() };
+    saveUsers(users);
+    document.getElementById('mgmt-user').value = '';
+    document.getElementById('mgmt-pass').value = '';
+    showMsg(msg, `✓ Cuenta "${u}" creada correctamente.`, 'ok');
+    renderUserList();
+  };
+
+  window.mgmtDeleteUser = function(name) {
+    if (!confirm(`¿Eliminar usuario "${name}"?`)) return;
+    const users = getUsers();
+    delete users[name];
+    saveUsers(users);
+    renderUserList();
+  };
+
+  function showMsg(el, text, type) {
+    el.textContent = text;
+    el.style.display = 'block';
+    el.style.background = type==='ok' ? 'rgba(0,200,100,0.15)' : 'rgba(239,51,36,0.15)';
+    el.style.border = `1px solid ${type==='ok'?'rgba(0,200,100,0.4)':'rgba(239,51,36,0.4)'}`;
+    el.style.color = type==='ok' ? '#4ade80' : '#ff6b5b';
+    setTimeout(()=>{ el.style.display='none'; }, 3000);
+  }
+})();
+</script>
+</body>
+</html>
