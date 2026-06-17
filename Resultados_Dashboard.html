@@ -607,8 +607,8 @@ const RAW = {
      byProduct:{Computo:{W:0,C:0,R:0,E:0,X:0,T:0,RG:0,V:0,TOTAL:0},Print:{W:0,C:0,R:0,E:8,X:59,T:20,RG:0,V:11,TOTAL:98},Gaming:{W:0,C:0,R:0,E:0,X:0,T:0,RG:0,V:0,TOTAL:0}},
      byActivity:{W:0,C:0,R:0,E:8,X:59,T:20,RG:0,V:11},jun:52,jul:46,TOTAL:98},
     {country:'El Salvador',code:'SLV',flag:'🇸🇻',region:'CACE',     trainers:['Patricia Benítez'],
-     byProduct:{Computo:{W:1,C:2,R:7,E:2,X:0,T:3,RG:0,V:4,TOTAL:19},Print:{W:0,C:2,R:7,E:2,X:0,T:3,RG:0,V:4,TOTAL:18},Gaming:{W:0,C:1,R:7,E:2,X:0,T:3,RG:0,V:4,TOTAL:17}},
-     byActivity:{W:1,C:5,R:21,E:6,X:0,T:9,RG:0,V:12},jun:31,jul:23,TOTAL:54},
+     byProduct:{Computo:{W:1,C:2,R:7,E:2,X:28,T:3,RG:0,V:4,TOTAL:47},Print:{W:0,C:2,R:7,E:2,X:29,T:3,RG:0,V:4,TOTAL:47},Gaming:{W:0,C:1,R:7,E:2,X:30,T:3,RG:0,V:4,TOTAL:47}},
+     byActivity:{W:1,C:5,R:21,E:6,X:87,T:9,RG:0,V:12},jun:31,jul:110,TOTAL:141},
     {country:'Costa Rica', code:'CRI',flag:'🇨🇷',region:'CACE',     trainers:['Jocselyn Rodríguez'],
      byProduct:{Computo:{W:1,C:2,R:2,E:2,X:30,T:5,RG:1,V:10,TOTAL:53},Print:{W:1,C:2,R:2,E:2,X:30,T:5,RG:1,V:10,TOTAL:53},Gaming:{W:1,C:2,R:2,E:2,X:30,T:5,RG:1,V:10,TOTAL:53}},
      byActivity:{W:3,C:6,R:6,E:6,X:90,T:15,RG:3,V:30},jun:78,jul:81,TOTAL:159},
@@ -632,7 +632,7 @@ const RAW = {
      byActivity:{W:9,C:0,R:6,E:5,X:253,T:9,RG:5,V:8},jun:115,jul:180,TOTAL:295},
     {country:'México',     code:'MEX',flag:'🇲🇽',region:'México',   trainers:['Omar Muñoz','Eduardo Miranda','Carlos Gallegos','Alejandro Santos','Roberto Meneses'],
      byProduct:{Computo:{W:5,C:0,R:23,E:14,X:80,T:0,RG:3,V:16,TOTAL:141},Print:{W:4,C:0,R:19,E:11,X:87,T:0,RG:1,V:11,TOTAL:133},Gaming:{W:5,C:0,R:23,E:14,X:80,T:0,RG:3,V:16,TOTAL:141}},
-     byActivity:{W:14,C:0,R:65,E:39,X:247,T:0,RG:7,V:43},jun:178,jul:237,TOTAL:415},
+     byActivity:{W:6,C:0,R:24,E:18,X:30,T:0,RG:0,V:7},jun:178,jul:237,TOTAL:415},
     {country:'Perú',       code:'PER',flag:'🇵🇪',region:'Perú',   trainers:['Edwars Santillán','Jose Benito'],
      byProduct:{Computo:{W:2,C:0,R:2,E:0,X:10,T:0,RG:0,V:0,TOTAL:14},Print:{W:0,C:0,R:4,E:16,X:27,T:0,RG:33,V:2,TOTAL:82},Gaming:{W:0,C:0,R:2,E:18,X:22,T:0,RG:28,V:0,TOTAL:70}},
      byActivity:{W:2,C:0,R:8,E:34,X:59,T:0,RG:61,V:2},jun:82,jul:84,TOTAL:166}
@@ -1627,11 +1627,4 @@ setInterval(updateCountdown, 1000);
     el.textContent = text;
     el.style.display = 'block';
     el.style.background = type==='ok' ? 'rgba(0,200,100,0.15)' : 'rgba(239,51,36,0.15)';
-    el.style.border = `1px solid ${type==='ok'?'rgba(0,200,100,0.4)':'rgba(239,51,36,0.4)'}`;
-    el.style.color = type==='ok' ? '#4ade80' : '#ff6b5b';
-    setTimeout(()=>{ el.style.display='none'; }, 3000);
-  }
-})();
-</script>
-</body>
-</html>
+    el.style.border = `1px s
