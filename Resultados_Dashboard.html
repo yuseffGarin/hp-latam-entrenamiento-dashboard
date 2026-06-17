@@ -518,14 +518,14 @@ const RAW = {
 };
 
 const ACT_COLORS = {
-  W:'#0047AB',   // Cobalt Blue     — Webcast
-  C:'#FF6B6B',   // Sunset Orange   — Canales Mayoristas
-  R:'#20B2AA',   // Teal Aqua       — Retail/Evento
-  E:'#FFD700',   // Golden Yellow   — ESF Grupales
-  X:'#9400D3',   // Deep Violet     — Capacit. 1:1
-  T:'#F08080',   // Coral Red       — Talleres
-  RG:'#2E8B57',  // Sea Green       — Retail Grupales
-  V:'#4B0082'    // Indigo          — Virtual
+  W:'#6D4C41',   // Road Brown      — Webcast
+  C:'#B584D2',   // Lavender        — Canales Mayoristas
+  R:'#F4511E',   // Amber Orange    — Retail/Evento
+  E:'#A1887F',   // Taupe           — ESF Grupales
+  X:'#AFB42B',   // Moss Olive      — Capacit. 1:1
+  T:'#00897B',   // Patina Green    — Talleres
+  RG:'#FDD835',  // Sunflower       — Retail Grupales
+  V:'#4BB4DE'    // Cerulean        — Virtual
 };
 const PROD_COLORS = {
   Computo:'#0047AB',  // Cobalt Blue (azul marino)
@@ -718,8 +718,8 @@ function renderAll() {
       datasets: radarCountries.map((c,i)=>({
         label:c.country,
         data:RAW.actKeys.map(a=>getByAct(c,a)),
-        borderColor:['#0047AB','#FF3900','#00BCD4','#FFD700'][i],
-        backgroundColor:['#0047AB22','#FF390022','#00BCD422','#FFD70030'][i],
+        borderColor:['#0047AB','#FF3900','#00BCD4','#AFB42B'][i],
+        backgroundColor:['#0047AB22','#FF390022','#00BCD422','#AFB42B30'][i],
         pointRadius:3
       }))
     },
@@ -753,7 +753,7 @@ function renderAll() {
     data:{
       labels:regEntries.map(e=>e[0]),
       datasets:[{label:'Actividades',data:regEntries.map(e=>e[1]),
-        backgroundColor:['#0047AB','#FF6B6B','#20B2AA','#9400D3','#FF3900'],
+        backgroundColor:['#6D4C41','#B584D2','#F4511E','#00897B','#AFB42B'],
         borderRadius:6,borderWidth:0}]
     },
     options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.4,
