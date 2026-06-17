@@ -597,6 +597,46 @@ function makeChart(id, cfg) {
 // ════════════════════════════════════════════════════════════
 // RENDER ALL
 // ════════════════════════════════════════════════════════════
+
+// ── Preload flag images for Chart.js canvas rendering ────────
+const FLAG_IMG_OBJS = {};
+(function(){
+  Object.entries(FLAG_IMGS).forEach(([country, src]) => {
+    const img = new Image();
+    img.src = src;
+    FLAG_IMG_OBJS[country] = img;
+  });
+})();
+
+// ── Chart.js plugin: draw flags on hbar Y-axis ───────────────
+Chart.register({
+  id: 'hbarFlagPlugin',
+  afterDraw(chart) {
+    if (chart.canvas.id !== 'chart-hbar') return;
+    const ctx = chart.ctx;
+    const yAxis = chart.scales.y;
+    if (!yAxis) return;
+    const FW = 26, FH = 17, GAP = 5;
+    const pad = yAxis.options?.ticks?.padding ?? 4;
+    yAxis.ticks.forEach((tick, i) => {
+      const label = Array.isArray(tick.label) ? tick.label[0] : tick.label;
+      const img = FLAG_IMG_OBJS[label];
+      if (!img) return;
+      const y = yAxis.getPixelForTick(i);
+      ctx.save();
+      ctx.font = '600 10px Arial';
+      const textW = ctx.measureText(label).width;
+      const labelRightX = yAxis.right - pad;
+      const labelLeftX  = labelRightX - textW;
+      const fx = labelLeftX - GAP - FW;
+      if (fx >= yAxis.left) {
+        ctx.drawImage(img, fx, y - FH / 2, FW, FH);
+      }
+      ctx.restore();
+    });
+  }
+});
+
 function renderAll() {
   const countries = filteredCountries();
 
@@ -829,9 +869,15 @@ function renderAll() {
         backgroundColor:hbarCountries.map(c=>getTotal(c)>=200?'#0096D6':getTotal(c)>=100?'#0249D6':getTotal(c)>=60?'#FF8900':'#FF3900'),
         borderRadius:4,borderWidth:0}]
     },
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,aspectRatio:1.3,
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,aspectRatio:1.5,
       plugins:{legend:{display:false}},
-      scales:{x:{beginAtZero:true,ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}
+      scales:{
+        x:{beginAtZero:true,ticks:{font:{size:10}}},
+        y:{
+          afterFit(axis){ axis.width = Math.max(axis.width, axis.width + 36); },
+          ticks:{font:{size:10},padding:4}
+        }
+      }}
   });
 
   // ── SCATTER: Junio vs Julio per act type ──────────────────
