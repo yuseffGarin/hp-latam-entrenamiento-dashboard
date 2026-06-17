@@ -999,12 +999,21 @@ function renderAll() {
     }).filter(Boolean);
   }
 
+  let radarShowAll = false;
+
   function buildRadarBtns() {
     const container = document.getElementById('radar-country-btns');
     if(!container) return;
     const allCountries = countries.slice().sort((a,b)=>getTotal(b)-getTotal(a));
-    container.innerHTML = allCountries.map(c=>{
-      const active = radarSelected.includes(c.country);
+    const latamActive = radarShowAll;
+    const latamBtn = `<button onclick="toggleRadarLatam()"
+      style="display:flex;align-items:center;font-size:11px;padding:4px 12px;border-radius:12px;
+             border:2px solid ${latamActive?'#0047AB':'#ccd6e8'};background:${latamActive?'#0047AB22':'#f5f7fa'};
+             color:${latamActive?'#0047AB':'#778'};font-weight:${latamActive?'700':'500'};
+             cursor:pointer;transition:all .15s;font-family:Arial,sans-serif">
+      🌎 LATAM</button>`;
+    const countryBtns = allCountries.map(c=>{
+      const active = !radarShowAll && radarSelected.includes(c.country);
       const idx = radarSelected.indexOf(c.country);
       const col = active ? RADAR_PALETTE[idx % RADAR_PALETTE.length] : '#ccd6e8';
       const flagSrc = COUNTRY_FLAGS[c.country];
@@ -1013,16 +1022,40 @@ function renderAll() {
         style="display:flex;align-items:center;font-size:11px;padding:4px 10px;border-radius:12px;
                border:2px solid ${col};background:${active?col+'22':'#f5f7fa'};
                color:${active?col:'#778'};font-weight:${active?'700':'500'};
-               cursor:pointer;transition:all .15s;font-family:Arial,sans-serif">${flagEl}${c.country}</button>`;
+               cursor:pointer;transition:all .15s;font-family:Arial,sans-serif;
+               opacity:${radarShowAll?0.45:1}">${flagEl}${c.country}</button>`;
     }).join('');
+    container.innerHTML = latamBtn + countryBtns;
   }
 
+  window.toggleRadarLatam = function() {
+    radarShowAll = !radarShowAll;
+    if(radarShowAll) {
+      // show all countries
+      const ch = charts['chart-radar'];
+      if(ch){
+        const all = countries.slice().sort((a,b)=>getTotal(b)-getTotal(a));
+        ch.data.datasets = all.map((c,i)=>{
+          const col = RADAR_PALETTE[i % RADAR_PALETTE.length];
+          return { label:c.country, data:RAW.actKeys.map(a=>getByAct(c,a)),
+                   borderColor:col, backgroundColor:col+'18', pointRadius:3,
+                   pointBackgroundColor:col, borderWidth:2 };
+        });
+        ch.update();
+      }
+    } else {
+      const ch = charts['chart-radar'];
+      if(ch){ ch.data.datasets = buildRadarDatasets(); ch.update(); }
+    }
+    buildRadarBtns();
+  };
+
   window.toggleRadarCountry = function(name) {
+    if(radarShowAll) { radarShowAll = false; radarSelected = [name]; buildRadarBtns(); const ch=charts['chart-radar']; if(ch){ch.data.datasets=buildRadarDatasets();ch.update();} return; }
     if(radarSelected.includes(name)) {
-      if(radarSelected.length <= 1) return; // keep at least 1
+      if(radarSelected.length <= 1) return;
       radarSelected = radarSelected.filter(x=>x!==name);
     } else {
-      if(radarSelected.length >= 6) radarSelected.shift(); // max 6
       radarSelected.push(name);
     }
     buildRadarBtns();
