@@ -669,6 +669,37 @@ Chart.register({
       document.getElementById('logo-mundo').src       = LOGO_IMGS.mundo;
 
 
+      // ── Individual Trainer Data (from Excel) ─────────────────────
+      const TRAINER_DATA = {
+        'Jocselyn Rodríguez':  {country:'Costa Rica',  region:'CACE',      Computo:53, Print:53, Gaming:53},
+        'José Escoto':         {country:'Honduras',    region:'CACE',      Computo:53, Print:53, Gaming:53},
+        'Patricia Benítez':    {country:'El Salvador', region:'CACE',      Computo:47, Print:47, Gaming:47},
+        'Yetzibell Fernández': {country:'Panamá',      region:'CACE',      Computo:46, Print:46, Gaming:46},
+        'Carlos Becerra':      {country:'Ecuador',     region:'CACE',      Computo:45, Print:45, Gaming:45},
+        'Soledad Calero':      {country:'Ecuador',     region:'CACE',      Computo:45, Print:45, Gaming:45},
+        'Alan Azurdia':        {country:'Guatemala',   region:'CACE',      Computo:21, Print:21, Gaming:21},
+        'Alejandro Santos':    {country:'México',      region:'México',    Computo:39, Print:45, Gaming:39},
+        'Carlos Gallegos':     {country:'México',      region:'México',    Computo:39, Print:39, Gaming:39},
+        'Roberto Meneses':     {country:'México',      region:'México',    Computo:45, Print:0,  Gaming:45},
+        'Eduardo Miranda':     {country:'México',      region:'México',    Computo:10, Print:39, Gaming:10},
+        'Omar Muñoz':          {country:'México',      region:'México',    Computo:8,  Print:10, Gaming:8},
+        'Ruben Gómez':         {country:'Chile',       region:'Chile',     Computo:41, Print:45, Gaming:35},
+        'Francisco Zambrano':  {country:'Chile',       region:'Chile',     Computo:34, Print:34, Gaming:34},
+        'Yuseff Garín':        {country:'Chile',       region:'Chile',     Computo:23, Print:19, Gaming:30},
+        'Joanny Banguero':     {country:'Colombia',    region:'Colombia',  Computo:38, Print:39, Gaming:33},
+        'Camilo Lagos':        {country:'Colombia',    region:'Colombia',  Computo:23, Print:22, Gaming:26},
+        'Julián Cardenas':     {country:'Colombia',    region:'Colombia',  Computo:24, Print:23, Gaming:21},
+        'Bryan Ramirez':       {country:'Colombia',    region:'Colombia',  Computo:2,  Print:32, Gaming:32},
+        'Carlos Valencia':     {country:'Colombia',    region:'Colombia',  Computo:32, Print:2,  Gaming:2},
+        'Jose Benito':         {country:'Perú',        region:'Perú',      Computo:6,  Print:41, Gaming:37},
+        'Edwars Santillán':    {country:'Perú',        region:'Perú',      Computo:8,  Print:41, Gaming:33},
+        'Claudio Brum':        {country:'Brasil',      region:'Brasil',    Computo:0,  Print:38, Gaming:0},
+        'Jonatas Liras':       {country:'Brasil',      region:'Brasil',    Computo:0,  Print:36, Gaming:0},
+        'Marcel Silva':        {country:'Brasil',      region:'Brasil',    Computo:0,  Print:24, Gaming:0},
+        'Cristian Ragonese':   {country:'Argentina',   region:'Argentina', Computo:10, Print:11, Gaming:10},
+      };
+
+
 function renderAll() {
   const countries = filteredCountries();
 
@@ -948,15 +979,17 @@ function renderAll() {
       }}
   });
 
-  // ── TRAINER TABLE ──────────────────────────────────────────
+  // ── TRAINER TABLE (individual data from Excel) ────────────
   const allTrainers = [];
-  countries.forEach(c=>{
-    c.trainers.forEach(t=>{
-      const tr = {name:t,country:c.country,region:c.region};
-      RAW.products.forEach(p=>{ tr[p] = c.byProduct[p].TOTAL / Math.max(c.trainers.length,1) | 0; });
-      tr.TOTAL = state.products.reduce((s,p)=>s+tr[p],0);
-      allTrainers.push(tr);
-    });
+  // Filter trainers by active country/region filters
+  const activeCountries = new Set(countries.map(c=>c.country));
+  const activeRegions   = new Set(countries.map(c=>c.region));
+  Object.entries(TRAINER_DATA).forEach(([name, d]) => {
+    if (!activeCountries.has(d.country) && !activeRegions.has(d.region)) return;
+    const tr = {name, country:d.country, region:d.region};
+    RAW.products.forEach(p=>{ tr[p] = d[p] || 0; });
+    tr.TOTAL = state.products.reduce((s,p)=>s+tr[p],0);
+    allTrainers.push(tr);
   });
   allTrainers.sort((a,b)=>b.TOTAL-a.TOTAL);
   // Regional totals for donut chart
