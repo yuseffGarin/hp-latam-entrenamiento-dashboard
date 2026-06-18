@@ -655,13 +655,19 @@ const RAW = {
   },
   // Approximate monthly split per country (proportional to their total weight)
   monthlyByCountry: {
-    'CACE':      {Junio:420, Julio:474},
-    'México':    {Junio:187, Julio:212},
-    'Colombia':  {Junio:158, Julio:179},
-    'Chile':     {Junio:133, Julio:150},
-    'Perú':      {Junio:75,  Julio:85},
-    'Brasil':    {Junio:44,  Julio:50},
-    'Argentina': {Junio:14,  Julio:16}
+    'LATAM':       {Junio:1031, Julio:1166},
+    'México':      {Junio:187,  Julio:212},
+    'Colombia':    {Junio:158,  Julio:179},
+    'Chile':       {Junio:133,  Julio:150},
+    'Ecuador':     {Junio:122,  Julio:137},
+    'Perú':        {Junio:75,   Julio:85},
+    'Costa Rica':  {Junio:72,   Julio:81},
+    'Honduras':    {Junio:72,   Julio:81},
+    'El Salvador': {Junio:64,   Julio:72},
+    'Panamá':      {Junio:62,   Julio:70},
+    'Brasil':      {Junio:44,   Julio:50},
+    'Guatemala':   {Junio:29,   Julio:32},
+    'Argentina':   {Junio:14,   Julio:16}
   }
 };
 
@@ -1023,16 +1029,18 @@ function renderAll() {
   });
 
   // ── LINE: Monthly with Country Filter ──────────────────────
-  const MONTHLY_REGION_PALETTE = [
-    '#0249D6','#3B72E0','#568392','#0E2841','#6F99E8','#2A67DC','#8AABF5'
-  ];
-  const MONTHLY_REGIONS = ['CACE','México','Colombia','Chile','Perú','Brasil','Argentina'];
-  let monthlySelected = ['CACE','México','Colombia','Chile'];
+  // Same palette and behavior as Radar
+  const MONTHLY_PALETTE = ['#0047AB','#FF3900','#00BCD4','#AFB42B','#A020F0','#FF8900','#00D072','#ED1C24','#0249D6','#3B72E0','#568392','#8AABF5'];
+  const MONTHLY_ALL_REGIONS = ['México','Colombia','Chile','Ecuador','Perú','Costa Rica','Honduras','El Salvador','Panamá','Brasil','Guatemala','Argentina'];
+  let monthlySelected = ['México','Colombia','Chile','Ecuador'];
+  let monthlyShowAll = false;
 
   function buildMonthlyDatasets() {
-    return monthlySelected.map((r,i)=>{
-      const col = MONTHLY_REGION_PALETTE[MONTHLY_REGIONS.indexOf(r) % MONTHLY_REGION_PALETTE.length];
-      const d = RAW.monthlyByCountry[r];
+    const list = monthlyShowAll ? MONTHLY_ALL_REGIONS : monthlySelected;
+    return list.map((r,i)=>{
+      const idx = MONTHLY_ALL_REGIONS.indexOf(r);
+      const col = MONTHLY_PALETTE[idx >= 0 ? idx : i % MONTHLY_PALETTE.length];
+      const d = RAW.monthlyByCountry[r] || {Junio:0,Julio:0};
       return {
         label: r,
         data: [d.Junio, d.Julio],
@@ -1053,36 +1061,39 @@ function renderAll() {
   function buildMonthlyBtns() {
     const container = document.getElementById('monthly-country-btns');
     if (!container) return;
-    const REGION_FLAGS = {
-      'CACE':      FLAG_IMGS['El Salvador']||'',
-      'México':    FLAG_IMGS['México']||'',
-      'Colombia':  FLAG_IMGS['Colombia']||'',
-      'Chile':     FLAG_IMGS['Chile']||'',
-      'Perú':      FLAG_IMGS['Perú']||'',
-      'Brasil':    FLAG_IMGS['Brasil']||'',
-      'Argentina': FLAG_IMGS['Argentina']||''
-    };
-    const REGION_EMOJIS = {
-      'CACE':'🌎','México':'🇲🇽','Colombia':'🇨🇴','Chile':'🇨🇱',
-      'Perú':'🇵🇪','Brasil':'🇧🇷','Argentina':'🇦🇷'
-    };
-    container.innerHTML = MONTHLY_REGIONS.map((r,i)=>{
-      const active = monthlySelected.includes(r);
-      const col = MONTHLY_REGION_PALETTE[i % MONTHLY_REGION_PALETTE.length];
-      const flagSrc = REGION_FLAGS[r];
+    const latamActive = monthlyShowAll;
+    const latamBtn = `<button onclick="toggleMonthlyLatam()"
+      style="display:flex;align-items:center;font-size:11px;padding:4px 12px;border-radius:12px;
+             border:2px solid ${latamActive?'#0047AB':'#ccd6e8'};background:${latamActive?'#0047AB22':'#f5f7fa'};
+             color:${latamActive?'#0047AB':'#778'};font-weight:${latamActive?'700':'500'};
+             cursor:pointer;transition:all .15s;font-family:Arial,sans-serif">
+      🌎 LATAM</button>`;
+    const countryBtns = MONTHLY_ALL_REGIONS.map((r,i)=>{
+      const active = !monthlyShowAll && monthlySelected.includes(r);
+      const col = MONTHLY_PALETTE[i % MONTHLY_PALETTE.length];
+      const flagSrc = FLAG_IMGS[r] || '';
       const flagEl = flagSrc
-        ? `<img src="${flagSrc}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;margin-right:4px">`
-        : `<span style="margin-right:4px">${REGION_EMOJIS[r]||''}</span>`;
+        ? `<img src="${flagSrc}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:4px">`
+        : '';
       return `<button onclick="toggleMonthlyRegion('${r}')"
         style="display:flex;align-items:center;font-size:11px;padding:4px 10px;border-radius:12px;
                border:2px solid ${active?col:'#ccd6e8'};background:${active?col+'22':'#f5f7fa'};
                color:${active?col:'#778'};font-weight:${active?'700':'500'};
-               cursor:pointer;transition:all .15s;font-family:'Inter Tight',Arial,sans-serif">
-        ${flagEl}${r}</button>`;
+               cursor:pointer;transition:all .15s;font-family:'Inter Tight',Arial,sans-serif;
+               opacity:${monthlyShowAll?0.45:1}">${flagEl}${r}</button>`;
     }).join('');
+    container.innerHTML = latamBtn + countryBtns;
   }
 
+  window.toggleMonthlyLatam = function() {
+    monthlyShowAll = !monthlyShowAll;
+    buildMonthlyBtns();
+    const ch = charts['chart-line-monthly'];
+    if (ch) { ch.data.datasets = buildMonthlyDatasets(); ch.update(); }
+  };
+
   window.toggleMonthlyRegion = function(name) {
+    if (monthlyShowAll) { monthlyShowAll = false; monthlySelected = [name]; buildMonthlyBtns(); const ch=charts['chart-line-monthly']; if(ch){ch.data.datasets=buildMonthlyDatasets();ch.update();} return; }
     if (monthlySelected.includes(name)) {
       if (monthlySelected.length <= 1) return;
       monthlySelected = monthlySelected.filter(x => x !== name);
