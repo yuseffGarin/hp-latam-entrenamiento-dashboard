@@ -203,7 +203,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px">
       <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:#0249D6;border-radius:50%;margin-bottom:16px">
-        <span style="font-weight:900;font-size:28px;color:#fff;letter-spacing:-2px;font-family:Arial,sans-serif">hp</span>
+        <img id="splash-hp-logo" src="" alt="HP" style="width:44px;height:44px;object-fit:contain">
       </div>
       <div style="color:#fff;font-size:20px;font-weight:700;letter-spacing:0.5px">Acceso de Usuario</div>
       <div style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:4px">Dashboard Entrenamiento LATAM · Q3FY2026</div>
@@ -802,6 +802,7 @@ Chart.register({
       // Assign logo srcs
       document.getElementById('logo-actividades').src = LOGO_IMGS.actividades;
       document.getElementById('logo-hp').src          = LOGO_IMGS.hp;
+      document.getElementById('splash-hp-logo').src   = LOGO_IMGS.hp;
       document.getElementById('logo-hyperx').src      = LOGO_IMGS.hyperx;
       document.getElementById('logo-omnibook').src    = LOGO_IMGS.omnibook;
       document.getElementById('logo-mundo').src       = LOGO_IMGS.mundo;
