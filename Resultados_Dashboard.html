@@ -482,7 +482,8 @@ select.filter-select:focus{border-color:var(--hp-blue)}
           <div class="chart-detail">Junio vs Julio por producto</div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart-line-monthly"></canvas></div>
+      <div class="chart-wrap" style="max-height:220px"><canvas id="chart-line-monthly"></canvas></div>
+      <div id="monthly-country-btns" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;padding:8px 12px 4px"></div>
     </div>
     <div class="chart-card">
       <div class="chart-head">
@@ -651,6 +652,16 @@ const RAW = {
   monthly: {
     Junio:  {Computo:315,Print:387,Gaming:330,TOTAL:1032},
     Julio:  {Computo:349,Print:434,Gaming:384,TOTAL:1167}
+  },
+  // Approximate monthly split per country (proportional to their total weight)
+  monthlyByCountry: {
+    'CACE':      {Junio:420, Julio:474},
+    'México':    {Junio:187, Julio:212},
+    'Colombia':  {Junio:158, Julio:179},
+    'Chile':     {Junio:133, Julio:150},
+    'Perú':      {Junio:75,  Julio:85},
+    'Brasil':    {Junio:44,  Julio:50},
+    'Argentina': {Junio:14,  Julio:16}
   }
 };
 
@@ -1011,23 +1022,113 @@ function renderAll() {
     plugins:[prodBarLogoPlugin]
   });
 
-  // ── LINE: Monthly ──────────────────────────────────────────
+  // ── LINE: Monthly with Country Filter ──────────────────────
+  const MONTHLY_REGION_PALETTE = [
+    '#0249D6','#3B72E0','#568392','#0E2841','#6F99E8','#2A67DC','#8AABF5'
+  ];
+  const MONTHLY_REGIONS = ['CACE','México','Colombia','Chile','Perú','Brasil','Argentina'];
+  let monthlySelected = ['CACE','México','Colombia','Chile'];
+
+  function buildMonthlyDatasets() {
+    return monthlySelected.map((r,i)=>{
+      const col = MONTHLY_REGION_PALETTE[MONTHLY_REGIONS.indexOf(r) % MONTHLY_REGION_PALETTE.length];
+      const d = RAW.monthlyByCountry[r];
+      return {
+        label: r,
+        data: [d.Junio, d.Julio],
+        borderColor: col,
+        backgroundColor: col + '18',
+        pointRadius: 7,
+        pointHoverRadius: 9,
+        pointBackgroundColor: col,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        borderWidth: 3,
+        tension: 0.3,
+        fill: false
+      };
+    });
+  }
+
+  function buildMonthlyBtns() {
+    const container = document.getElementById('monthly-country-btns');
+    if (!container) return;
+    const REGION_FLAGS = {
+      'CACE':      FLAG_IMGS['El Salvador']||'',
+      'México':    FLAG_IMGS['México']||'',
+      'Colombia':  FLAG_IMGS['Colombia']||'',
+      'Chile':     FLAG_IMGS['Chile']||'',
+      'Perú':      FLAG_IMGS['Perú']||'',
+      'Brasil':    FLAG_IMGS['Brasil']||'',
+      'Argentina': FLAG_IMGS['Argentina']||''
+    };
+    const REGION_EMOJIS = {
+      'CACE':'🌎','México':'🇲🇽','Colombia':'🇨🇴','Chile':'🇨🇱',
+      'Perú':'🇵🇪','Brasil':'🇧🇷','Argentina':'🇦🇷'
+    };
+    container.innerHTML = MONTHLY_REGIONS.map((r,i)=>{
+      const active = monthlySelected.includes(r);
+      const col = MONTHLY_REGION_PALETTE[i % MONTHLY_REGION_PALETTE.length];
+      const flagSrc = REGION_FLAGS[r];
+      const flagEl = flagSrc
+        ? `<img src="${flagSrc}" style="width:18px;height:12px;object-fit:cover;border-radius:2px;margin-right:4px">`
+        : `<span style="margin-right:4px">${REGION_EMOJIS[r]||''}</span>`;
+      return `<button onclick="toggleMonthlyRegion('${r}')"
+        style="display:flex;align-items:center;font-size:11px;padding:4px 10px;border-radius:12px;
+               border:2px solid ${active?col:'#ccd6e8'};background:${active?col+'22':'#f5f7fa'};
+               color:${active?col:'#778'};font-weight:${active?'700':'500'};
+               cursor:pointer;transition:all .15s;font-family:'Inter Tight',Arial,sans-serif">
+        ${flagEl}${r}</button>`;
+    }).join('');
+  }
+
+  window.toggleMonthlyRegion = function(name) {
+    if (monthlySelected.includes(name)) {
+      if (monthlySelected.length <= 1) return;
+      monthlySelected = monthlySelected.filter(x => x !== name);
+    } else {
+      monthlySelected.push(name);
+    }
+    buildMonthlyBtns();
+    const ch = charts['chart-line-monthly'];
+    if (ch) { ch.data.datasets = buildMonthlyDatasets(); ch.update(); }
+  };
+
   makeChart('chart-line-monthly',{
     type:'line',
     data:{
       labels:['Junio','Julio'],
-      datasets: RAW.products.filter(p=>state.products.includes(p)).map(p=>({
-        label:p,
-        data:[RAW.monthly.Junio[p],RAW.monthly.Julio[p]],
-        borderColor:PROD_COLORS[p],
-        backgroundColor:PROD_COLORS[p]+'22',
-        pointRadius:5,pointHoverRadius:7,tension:0.3,fill:true
-      }))
+      datasets: buildMonthlyDatasets()
     },
-    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.4,
-      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}}},
-      scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        datalabels: false,
+        tooltip:{
+          callbacks:{
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y} actividades`
+          }
+        }
+      },
+      scales:{
+        y:{
+          beginAtZero:false,
+          grid:{color:'rgba(0,0,0,0.05)',drawBorder:false},
+          ticks:{font:{size:10},color:'#8a9bb0'},
+          border:{display:false}
+        },
+        x:{
+          grid:{display:false},
+          ticks:{font:{size:12,weight:'700'},color:'#0249D6'},
+          border:{display:false}
+        }
+      },
+      animation:{duration:600}
+    }
   });
+  buildMonthlyBtns();
 
   // ── RADAR ──────────────────────────────────────────────────
   const RADAR_PALETTE = ['#0047AB','#FF3900','#00BCD4','#AFB42B','#A020F0','#FF8900','#00D072','#ED1C24'];
