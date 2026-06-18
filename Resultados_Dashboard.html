@@ -190,11 +190,11 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 <!-- ══════════════════════════════════════════════════════════
      AUTH OVERLAY
 ══════════════════════════════════════════════════════════ -->
-<div id="auth-overlay" style="position:fixed;inset:0;background:linear-gradient(135deg,#0a1628 0%,#0e2841 60%,#0d1f3c 100%);z-index:9999;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif">
+<div id="auth-overlay" style="position:fixed;inset:0;background:#050E1A;background-image:linear-gradient(135deg,#081528 0%,#0249D6 200%);z-index:9999;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif">
   <div style="width:100%;max-width:420px;padding:0 20px">
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:32px">
-      <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:linear-gradient(135deg,#0096D6,#0249D6);border-radius:50%;margin-bottom:16px;box-shadow:0 0 40px rgba(0,150,214,0.4)">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:#0249D6;border-radius:50%;margin-bottom:16px">
         <span style="font-weight:900;font-size:28px;color:#fff;letter-spacing:-2px;font-family:Arial,sans-serif">hp</span>
       </div>
       <div style="color:#fff;font-size:20px;font-weight:700;letter-spacing:0.5px">Acceso de Usuario</div>
@@ -219,7 +219,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
           onkeydown="if(event.key==='Enter')authLogin()"/>
       </div>
       <button onclick="authLogin()"
-        style="width:100%;padding:14px;background:linear-gradient(135deg,#0096D6,#0249D6);border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1.5px;margin-top:8px;transition:opacity .2s;font-family:Arial,sans-serif"
+        style="width:100%;padding:14px;background:#0249D6;border:none;color:#fff;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:2px;margin-top:8px;transition:opacity .2s;font-family:'Inter Tight',Arial,sans-serif;text-transform:uppercase"
         onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">ACCEDER</button>
       <div style="text-align:center;margin-top:20px">
         <span style="color:rgba(255,255,255,0.35);font-size:12px">¿No tienes acceso? Contacta al administrador.</span>
@@ -240,7 +240,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
         <option value="admin">Admin — Gestión de usuarios</option>
       </select>
       <button onclick="authCreateUser()"
-        style="width:100%;padding:13px;background:linear-gradient(135deg,#0096D6,#0249D6);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;margin-bottom:10px">CREAR CUENTA</button>
+        style="width:100%;padding:13px;background:#0249D6;border:none;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:'Inter Tight',Arial,sans-serif;margin-bottom:10px;letter-spacing:1px">CREAR CUENTA</button>
       <button onclick="showLoginPanel()"
         style="width:100%;padding:13px;background:transparent;border:1.5px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.6);font-size:14px;cursor:pointer;font-family:Arial,sans-serif">← Volver</button>
     </div>
@@ -249,7 +249,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 
 <!-- USER MGMT MODAL -->
 <div id="user-mgmt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:8000;align-items:center;justify-content:center;font-family:Arial,sans-serif">
-  <div style="background:#0e2841;border-radius:12px;padding:28px;width:90%;max-width:520px;max-height:80vh;overflow-y:auto;border:1px solid rgba(0,150,214,0.3)">
+  <div style="background:#071428;padding:28px;width:90%;max-width:520px;max-height:80vh;overflow-y:auto;border:1px solid rgba(2,73,214,0.4)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div style="color:#fff;font-size:17px;font-weight:700">⚙️ Gestión de Usuarios</div>
       <button onclick="document.getElementById('user-mgmt-modal').style.display='none'"
@@ -300,8 +300,8 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 
     <div id="topbar-user" style="display:none;align-items:center;gap:10px">
       <span id="topbar-username" style="color:rgba(255,255,255,0.8);font-size:12px;font-weight:600"></span>
-      <button id="btn-user-mgmt" onclick="openUserMgmt()" style="display:none;background:rgba(0,150,214,0.2);border:1px solid rgba(0,150,214,0.5);color:#fff;padding:4px 10px;border-radius:2px;font-size:11px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif">⚙️ Usuarios</button>
-      <button onclick="authLogout()" style="background:rgba(239,51,36,0.2);border:1px solid rgba(239,51,36,0.4);color:#ff8f7e;padding:4px 10px;border-radius:2px;font-size:11px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif">Cerrar Sesión</button>
+      <button id="btn-user-mgmt" onclick="openUserMgmt()" style="display:none;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:#fff;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer;font-family:'Inter Tight',Arial,sans-serif;letter-spacing:0.5px">⚙️ Usuarios</button>
+      <button onclick="authLogout()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:'Inter Tight',Arial,sans-serif">Cerrar Sesión</button>
     </div>
     <button id="refresh-countdown" onclick="location.reload()" title="Recargar ahora" style="background:rgba(0,150,214,0.2);border:1px solid rgba(0,150,214,0.5);color:#fff;padding:4px 12px;border-radius:2px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:background 0.2s;font-family:Arial,sans-serif" onmouseover="this.style.background='rgba(0,150,214,0.4)'" onmouseout="this.style.background='rgba(0,150,214,0.2)'">↻ 05:00</button>
   </div>
@@ -1641,5 +1641,4 @@ setInterval(updateCountdown, 1000);
 
 })();
 </script>
-</body>
-</html>
+<
