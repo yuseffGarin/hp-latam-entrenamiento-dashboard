@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partner Training — Detalle por País</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4fa;color:#222;min-height:100vh}
+
+  /* TOPBAR */
+  .topbar{background:#0249D6;padding:12px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px #0002}
+  .topbar img{height:28px;width:auto}
+  .topbar h1{color:#fff;font-size:16px;font-weight:700;letter-spacing:.3px}
+  .topbar span{color:#aac4ff;font-size:13px;margin-left:auto}
+  .back-btn{color:#fff;text-decoration:none;font-size:12px;border:1.5px solid #fff4;
+            border-radius:8px;padding:4px 12px;margin-left:auto;transition:background .15s}
+  .back-btn:hover{background:#ffffff22}
+
+  /* CONTROLS */
+  .controls{padding:20px 24px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .view-label{font-size:12px;font-weight:600;color:#556;margin-right:4px}
+  .view-btn{font-size:12px;padding:5px 16px;border-radius:10px;border:1.5px solid #ccd6e8;
+             background:#fff;color:#445;cursor:pointer;font-weight:500;transition:all .15s}
+  .view-btn.active{background:#0249D6;border-color:#0249D6;color:#fff;font-weight:700}
+
+  /* COUNTRY PILLS */
+  .pill-bar{padding:0 24px 16px;display:flex;flex-wrap:wrap;gap:6px}
+  .cpill{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:4px 12px;
+          border-radius:12px;border:1.5px solid #ccd6e8;background:#fff;color:#445;
+          cursor:pointer;font-weight:500;transition:all .15s}
+  .cpill.active{background:#0249D6;border-color:#0249D6;color:#fff;font-weight:700}
+  .cpill img{width:16px;height:11px;object-fit:cover;border-radius:1px}
+  .cpill.special{background:#f0f4fa}
+
+  /* GRID VIEW */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:0 24px 32px}
+  .card{background:#fff;border-radius:14px;padding:18px 18px 14px;box-shadow:0 1px 6px #0001;
+         border:1px solid #e4eaf5}
+  .card-title{font-size:13px;font-weight:700;color:#1a2b5e;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+  .card-sub{font-size:11px;color:#778;margin-bottom:14px}
+  .card canvas{max-height:160px}
+
+  /* COMPARISON VIEW */
+  .comparison{padding:0 24px 32px}
+  .comp-card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 1px 6px #0001;border:1px solid #e4eaf5}
+  .comp-card canvas{max-height:420px}
+  .comp-title{font-size:15px;font-weight:700;color:#1a2b5e;margin-bottom:4px}
+  .comp-sub{font-size:12px;color:#778;margin-bottom:20px}
+
+  /* LEGEND */
+  .legend{display:flex;flex-wrap:wrap;gap:12px;padding:0 24px 20px;justify-content:center}
+  .leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#445}
+  .leg-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+
+  /* TOTAL BADGE */
+  .total-badge{font-size:11px;background:#e8f0fe;color:#0249D6;border-radius:8px;
+                padding:2px 8px;font-weight:700;margin-left:auto}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <img id="hp-logo" src="" alt="HP">
+  <h1>Entrenamientos Partner — Detalle por País</h1>
+  <a href="Resultados_Dashboard.html" class="back-btn">← Volver al Dashboard</a>
+</div>
+
+<div class="controls">
+  <span class="view-label">Vista:</span>
+  <button class="view-btn active" onclick="setView('grid')" id="btn-grid">🔲 Grilla por país</button>
+  <button class="view-btn" onclick="setView('comparison')" id="btn-comp">📊 Comparación LATAM</button>
+</div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:#7C3AED"></div>Qualcomm</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#2563EB"></div>Intel</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#DC2626"></div>AMD</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#D97706"></div>Microsoft</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#16A34A"></div>Nvidia</div>
+</div>
+
+<div class="pill-bar" id="pill-bar"></div>
+
+<div class="grid" id="grid-view"></div>
+<div class="comparison" id="comp-view" style="display:none">
+  <div class="comp-card">
+    <div class="comp-title">Comparación por País</div>
+    <div class="comp-sub" id="comp-sub">Todos los países — entrenamientos por fabricante</div>
+    <canvas id="comp-chart"></canvas>
+  </div>
+</div>
+
+<script>
+const PARTNER_LABELS = ['Qualcomm','Intel','AMD','Microsoft','Nvidia'];
+const PARTNER_COLORS = ['#7C3AED','#2563EB','#DC2626','#D97706','#16A34A'];
+const PARTNER_KEYS   = ['Q','I','A','M','N'];
+
+const PARTNER_DATA = {
+  'LATAM':       {Q:56, I:82, A:87, M:55, N:41},
+  'CACE':        {Q:0,  I:7,  A:7,  M:7,  N:0},
+  'Argentina':   {Q:2,  I:2,  A:2,  M:1,  N:1},
+  'Brasil':      {Q:0,  I:0,  A:0,  M:0,  N:0},
+  'Chile':       {Q:27, I:25, A:26, M:5,  N:9},
+  'Colombia':    {Q:12, I:35, A:35, M:28, N:22},
+  'Costa Rica':  {Q:0,  I:1,  A:1,  M:1,  N:0},
+  'Ecuador':     {Q:0,  I:2,  A:2,  M:2,  N:0},
+  'El Salvador': {Q:0,  I:1,  A:1,  M:1,  N:0},
+  'Guatemala':   {Q:0,  I:1,  A:1,  M:1,  N:0},
+  'Honduras':    {Q:0,  I:1,  A:1,  M:1,  N:0},
+  'México':      {Q:7,  I:3,  A:4,  M:9,  N:3},
+  'Panamá':      {Q:0,  I:1,  A:1,  M:1,  N:0},
+  'Perú':        {Q:8,  I:10, A:13, M:5,  N:6},
+};
+
+const FLAGS = {
+  'Argentina':'🇦🇷','Brasil':'🇧🇷','Chile':'🇨🇱','Colombia':'🇨🇴',
+  'Costa Rica':'🇨🇷','Ecuador':'🇪🇨','El Salvador':'🇸🇻','Guatemala':'🇬🇹',
+  'Honduras':'🇭🇳','México':'🇲🇽','Panamá':'🇵🇦','Perú':'🇵🇪'
+};
+
+const COUNTRIES_INDIVIDUAL = ['Chile','Colombia','México','Perú','Argentina','Costa Rica','Ecuador',
+                               'El Salvador','Guatemala','Honduras','Panamá','Brasil'];
+const ALL_PILLS = ['LATAM','CACE',...COUNTRIES_INDIVIDUAL];
+
+let currentView = 'grid';
+let selectedCountry = 'all'; // 'all' or specific country
+let compChart = null;
+const cardCharts = {};
+
+function getVals(c){ return PARTNER_KEYS.map(k => PARTNER_DATA[c]?.[k]||0); }
+function getTotal(c){ return getVals(c).reduce((s,v)=>s+v,0); }
+
+// ── PILLS ──────────────────────────────────────────────────────
+function buildPills(){
+  const bar = document.getElementById('pill-bar');
+  bar.innerHTML = ['Todos',...ALL_PILLS].map(c => {
+    const isActive = (c === 'Todos' && selectedCountry === 'all') || c === selectedCountry;
+    const flag = FLAGS[c] || (c==='LATAM'?'🌎':(c==='CACE'?'🌐':''));
+    return `<button class="cpill ${isActive?'active':''} ${(c==='LATAM'||c==='CACE'||c==='Todos')?'special':''}"
+      onclick="selectCountry('${c}')">
+      ${flag} ${c}
+    </button>`;
+  }).join('');
+}
+
+window.selectCountry = function(c){
+  selectedCountry = c === 'Todos' ? 'all' : c;
+  buildPills();
+  renderView();
+};
+
+// ── VIEWS ──────────────────────────────────────────────────────
+window.setView = function(v){
+  currentView = v;
+  document.getElementById('btn-grid').classList.toggle('active', v==='grid');
+  document.getElementById('btn-comp').classList.toggle('active', v==='comparison');
+  renderView();
+};
+
+function renderView(){
+  if(currentView === 'grid') renderGrid();
+  else renderComparison();
+}
+
+// ── GRID VIEW ──────────────────────────────────────────────────
+function renderGrid(){
+  document.getElementById('grid-view').style.display = 'grid';
+  document.getElementById('comp-view').style.display = 'none';
+
+  let countries;
+  if(selectedCountry === 'all') countries = ALL_PILLS;
+  else countries = [selectedCountry];
+
+  const grid = document.getElementById('grid-view');
+  grid.innerHTML = '';
+
+  // Destroy old charts
+  Object.values(cardCharts).forEach(ch => ch.destroy());
+  Object.keys(cardCharts).forEach(k => delete cardCharts[k]);
+
+  countries.forEach(c => {
+    const vals = getVals(c);
+    const total = vals.reduce((s,v)=>s+v,0);
+    const flag = FLAGS[c] || (c==='LATAM'?'🌎':(c==='CACE'?'🌐':''));
+    const hasData = total > 0;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-title">
+        <span style="font-size:18px">${flag}</span> ${c}
+        <span class="total-badge">${total} total</span>
+      </div>
+      <div class="card-sub">Entrenamientos por fabricante</div>
+      ${hasData ? `<canvas id="chart-${c.replace(/[^a-z]/gi,'_')}"></canvas>` 
+                : `<div style="text-align:center;padding:40px 0;color:#aab;font-size:12px">Sin datos registrados</div>`}
+    `;
+    grid.appendChild(card);
+
+    if(hasData){
+      const id = `chart-${c.replace(/[^a-z]/gi,'_')}`;
+      const ctx = document.getElementById(id).getContext('2d');
+      cardCharts[c] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: PARTNER_LABELS,
+          datasets: [{
+            data: vals,
+            backgroundColor: PARTNER_COLORS,
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          aspectRatio: 1.8,
+          plugins: {
+            legend: {display: false},
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const pct = total ? ((ctx.raw/total)*100).toFixed(1) : 0;
+                  return `${ctx.raw} entrenamientos (${pct}%)`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {grid:{display:false}, ticks:{font:{size:11}}},
+            y: {
+              beginAtZero: true,
+              grid:{color:'#f0f4fa'},
+              ticks:{font:{size:10}, stepSize:1}
+            }
+          }
+        }
+      });
+    }
+  });
+}
+
+// ── COMPARISON VIEW ────────────────────────────────────────────
+function renderComparison(){
+  document.getElementById('grid-view').style.display = 'none';
+  document.getElementById('comp-view').style.display = 'block';
+
+  let countries;
+  if(selectedCountry === 'all') countries = COUNTRIES_INDIVIDUAL;
+  else if(selectedCountry === 'LATAM') countries = COUNTRIES_INDIVIDUAL;
+  else if(selectedCountry === 'CACE') countries = ['Costa Rica','Ecuador','El Salvador','Guatemala','Honduras','Panamá'];
+  else countries = [selectedCountry];
+
+  const sub = selectedCountry === 'all' ? 'Todos los países — entrenamientos por fabricante'
+            : selectedCountry === 'CACE' ? 'Región CACE — entrenamientos por fabricante'
+            : selectedCountry + ' — entrenamientos por fabricante';
+  document.getElementById('comp-sub').textContent = sub;
+
+  if(compChart) { compChart.destroy(); compChart = null; }
+
+  const ctx = document.getElementById('comp-chart').getContext('2d');
+  compChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: countries,
+      datasets: PARTNER_LABELS.map((label,i) => ({
+        label,
+        data: countries.map(c => PARTNER_DATA[c]?.[PARTNER_KEYS[i]]||0),
+        backgroundColor: PARTNER_COLORS[i],
+        borderRadius: 4,
+        borderSkipped: false,
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: countries.length <= 3 ? 2.5 : 2,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {font:{size:12}, padding:16, usePointStyle:true, pointStyleWidth:10}
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+        }
+      },
+      scales: {
+        x: {grid:{display:false}, ticks:{font:{size:11}}},
+        y: {
+          beginAtZero: true,
+          grid:{color:'#f0f4fa'},
+          ticks:{font:{size:11}}
+        }
+      }
+    }
+  });
+}
+
+// ── HP LOGO ────────────────────────────────────────────────────
+// Try to load from same folder
+(function(){
+  const img = document.getElementById('hp-logo');
+  img.onerror = () => { img.style.display='none'; };
+  img.src = 'Logos/HP.png';
+})();
+
+// ── INIT ───────────────────────────────────────────────────────
+buildPills();
+renderGrid();
+</script>
+</body>
+</html>
