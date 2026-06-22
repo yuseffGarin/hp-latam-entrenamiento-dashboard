@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Partner Training — Detalle por País</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4fa;color:#222;min-height:100vh}
@@ -226,6 +227,17 @@ function renderGrid(){
                   return `${ctx.raw} entrenamientos (${pct}%)`;
                 }
               }
+            },
+            datalabels: {
+              color: '#fff',
+              anchor: 'center',
+              align: 'center',
+              font: {weight: '700', size: 11},
+              formatter: (value) => {
+                if (!value || !total) return '';
+                const pct = (value / total * 100);
+                return pct >= 5 ? pct.toFixed(0) + '%' : '';
+              }
             }
           },
           scales: {
@@ -285,7 +297,8 @@ function renderComparison(){
         tooltip: {
           mode: 'index',
           intersect: false,
-        }
+        },
+        datalabels: {display: false}
       },
       scales: {
         x: {grid:{display:false}, ticks:{font:{size:11}}},
@@ -306,6 +319,9 @@ function renderComparison(){
   img.onerror = () => { img.style.display='none'; };
   img.src = 'Logos/HP.png';
 })();
+
+// ── REGISTER DATALABELS ────────────────────────────────────────
+if(window.ChartDataLabels) Chart.register(ChartDataLabels);
 
 // ── INIT ───────────────────────────────────────────────────────
 buildPills();
