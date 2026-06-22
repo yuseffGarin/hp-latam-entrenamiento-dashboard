@@ -427,6 +427,10 @@ function renderLatamCompare(){
     };
   });
 
+  // Total del partner destacado para calcular %
+  const highlightKey = PARTNER_KEYS[highlightIdx];
+  const highlightTotal = COMPARE_COUNTRIES.reduce((s,c) => s + (PARTNER_DATA[c]?.[highlightKey]||0), 0);
+
   latamCompareChart = new Chart(ctx, {
     type: 'bar',
     data: { labels: COMPARE_COUNTRIES, datasets },
@@ -446,11 +450,14 @@ function renderLatamCompare(){
           align: 'center',
           font: (ctx) => ({
             weight: ctx.datasetIndex === highlightIdx ? '800' : '600',
-            size:   ctx.datasetIndex === highlightIdx ? 12 : 10,
+            size:   ctx.datasetIndex === highlightIdx ? 11 : 10,
           }),
           formatter: (value, ctx) => {
             if(!value) return '';
-            if(ctx.datasetIndex === highlightIdx) return value;
+            if(ctx.datasetIndex === highlightIdx) {
+              const pct = highlightTotal ? Math.round(value / highlightTotal * 100) : 0;
+              return value + '\n' + pct + '%';
+            }
             if(value >= 5) return value;
             return '';
           }
