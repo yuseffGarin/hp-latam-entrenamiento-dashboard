@@ -14,7 +14,6 @@
   .topbar{background:#0249D6;padding:12px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px #0002}
   .topbar img{height:28px;width:auto}
   .topbar h1{color:#fff;font-size:16px;font-weight:700;letter-spacing:.3px}
-  .topbar span{color:#aac4ff;font-size:13px;margin-left:auto}
   .back-btn{color:#fff;text-decoration:none;font-size:12px;border:1.5px solid #fff4;
             border-radius:8px;padding:4px 12px;margin-left:auto;transition:background .15s}
   .back-btn:hover{background:#ffffff22}
@@ -35,6 +34,18 @@
   .cpill img{width:16px;height:11px;object-fit:cover;border-radius:1px}
   .cpill.special{background:#f0f4fa}
 
+  /* PARTNER FILTER BUTTONS */
+  .partner-filter{padding:8px 24px 6px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .pf-btn{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;
+           padding:6px 18px;border-radius:20px;border:2px solid #ccd6e8;background:#fff;
+           color:#445;cursor:pointer;transition:all .18s;user-select:none;
+           --c:#ccd6e8}
+  .pf-btn:hover{border-color:var(--c);color:var(--c);transform:translateY(-1px);box-shadow:0 2px 8px #0001}
+  .pf-btn.active{background:var(--c);border-color:var(--c);color:#fff;box-shadow:0 2px 8px color-mix(in srgb,var(--c) 30%,transparent)}
+  .pf-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:var(--c);transition:background .18s}
+  .pf-btn.active .pf-dot{background:#fff}
+  .filter-hint{text-align:center;font-size:11px;color:#99a;padding:2px 0 14px}
+
   /* GRID VIEW */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:0 24px 32px}
   .card{background:#fff;border-radius:14px;padding:18px 18px 14px;box-shadow:0 1px 6px #0001;
@@ -49,11 +60,6 @@
   .comp-card canvas{max-height:420px}
   .comp-title{font-size:15px;font-weight:700;color:#1a2b5e;margin-bottom:4px}
   .comp-sub{font-size:12px;color:#778;margin-bottom:20px}
-
-  /* LEGEND */
-  .legend{display:flex;flex-wrap:wrap;gap:12px;padding:0 24px 20px;justify-content:center}
-  .leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#445}
-  .leg-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
 
   /* TOTAL BADGE */
   .total-badge{font-size:11px;background:#e8f0fe;color:#0249D6;border-radius:8px;
@@ -86,13 +92,9 @@
   <button class="view-btn" onclick="setView('comparison')" id="btn-comp">📊 Comparación LATAM</button>
 </div>
 
-<div class="legend">
-  <div class="leg-item"><div class="leg-dot" style="background:#7C3AED"></div>Qualcomm</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#2563EB"></div>Intel</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#DC2626"></div>AMD</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#D97706"></div>Microsoft</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#16A34A"></div>Nvidia</div>
-</div>
+<!-- PARTNER FILTER (multi-select) -->
+<div class="partner-filter" id="partner-filter-bar"></div>
+<div class="filter-hint">Selecciona uno o varios partners para filtrar los gráficos</div>
 
 <div class="pill-bar" id="pill-bar"></div>
 
@@ -146,13 +148,47 @@ const COUNTRIES_INDIVIDUAL = ['Chile','Colombia','México','Perú','Argentina','
                                'El Salvador','Guatemala','Honduras','Panamá','Brasil'];
 const ALL_PILLS = ['LATAM','CACE',...COUNTRIES_INDIVIDUAL];
 
-let currentView = 'grid';
-let selectedCountry = 'all'; // 'all' or specific country
+let currentView   = 'grid';
+let selectedCountry = 'all';
 let compChart = null;
 const cardCharts = {};
 
-function getVals(c){ return PARTNER_KEYS.map(k => PARTNER_DATA[c]?.[k]||0); }
-function getTotal(c){ return getVals(c).reduce((s,v)=>s+v,0); }
+// ── PARTNER FILTER STATE (multi-select) ────────────────────────
+let selectedPartners = new Set(['Q','I','A','M','N']); // all on by default
+
+function buildPartnerFilterBtns(){
+  const bar = document.getElementById('partner-filter-bar');
+  bar.innerHTML = PARTNER_KEYS.map((key, i) => {
+    const active = selectedPartners.has(key);
+    const color  = PARTNER_COLORS[i];
+    return `<button class="pf-btn ${active ? 'active' : ''}"
+      style="--c:${color}"
+      onclick="togglePartner('${key}')">
+      <span class="pf-dot"></span>
+      ${PARTNER_LABELS[i]}
+    </button>`;
+  }).join('');
+}
+
+window.togglePartner = function(key){
+  if(selectedPartners.has(key)){
+    if(selectedPartners.size > 1) selectedPartners.delete(key); // keep at least 1
+  } else {
+    selectedPartners.add(key);
+  }
+  buildPartnerFilterBtns();
+  renderView();
+};
+
+// helpers that respect the filter
+function getFilteredEntries(){
+  return PARTNER_KEYS
+    .map((k,i) => ({key:k, label:PARTNER_LABELS[i], color:PARTNER_COLORS[i]}))
+    .filter(e => selectedPartners.has(e.key));
+}
+function getFilteredVals(country){
+  return getFilteredEntries().map(e => PARTNER_DATA[country]?.[e.key] || 0);
+}
 
 // ── PILLS ──────────────────────────────────────────────────────
 function buildPills(){
@@ -190,6 +226,7 @@ function renderView(){
 function renderGrid(){
   document.getElementById('grid-view').style.display = 'grid';
   document.getElementById('comp-view').style.display = 'none';
+  document.getElementById('latam-compare-section').style.display = 'block';
 
   let countries;
   if(selectedCountry === 'all') countries = ALL_PILLS;
@@ -202,10 +239,13 @@ function renderGrid(){
   Object.values(cardCharts).forEach(ch => ch.destroy());
   Object.keys(cardCharts).forEach(k => delete cardCharts[k]);
 
+  const filtered = getFilteredEntries();
+
   countries.forEach(c => {
-    const vals = getVals(c);
+    const vals  = filtered.map(e => PARTNER_DATA[c]?.[e.key] || 0);
     const total = vals.reduce((s,v)=>s+v,0);
-    const flag = FLAGS[c] || (c==='LATAM'?'🌎':(c==='CACE'?'🌐':''));
+    const allTotal = PARTNER_KEYS.reduce((s,k)=>s+(PARTNER_DATA[c]?.[k]||0),0);
+    const flag  = FLAGS[c] || (c==='LATAM'?'🌎':(c==='CACE'?'🌐':''));
     const hasData = total > 0;
 
     const card = document.createElement('div');
@@ -216,21 +256,22 @@ function renderGrid(){
         <span class="total-badge">${total} total</span>
       </div>
       <div class="card-sub">Entrenamientos por fabricante</div>
-      ${hasData ? `<canvas id="chart-${c.replace(/[^a-z]/gi,'_')}"></canvas>` 
-                : `<div style="text-align:center;padding:40px 0;color:#aab;font-size:12px">Sin datos registrados</div>`}
+      ${hasData
+        ? `<canvas id="chart-${c.replace(/[^a-z]/gi,'_')}"></canvas>`
+        : `<div style="text-align:center;padding:40px 0;color:#aab;font-size:12px">Sin datos registrados</div>`}
     `;
     grid.appendChild(card);
 
     if(hasData){
-      const id = `chart-${c.replace(/[^a-z]/gi,'_')}`;
+      const id  = `chart-${c.replace(/[^a-z]/gi,'_')}`;
       const ctx = document.getElementById(id).getContext('2d');
       cardCharts[c] = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: PARTNER_LABELS,
+          labels: filtered.map(e => e.label),
           datasets: [{
             data: vals,
-            backgroundColor: PARTNER_COLORS,
+            backgroundColor: filtered.map(e => e.color),
             borderRadius: 6,
             borderSkipped: false,
           }]
@@ -253,9 +294,9 @@ function renderGrid(){
               color: '#fff',
               anchor: 'center',
               align: 'center',
-              font: {weight: '700', size: 11},
+              font: {weight:'700', size:11},
               formatter: (value) => {
-                if (!value || !total) return '';
+                if(!value || !total) return '';
                 const pct = (value / total * 100);
                 return pct >= 5 ? pct.toFixed(0) + '%' : '';
               }
@@ -279,6 +320,7 @@ function renderGrid(){
 function renderComparison(){
   document.getElementById('grid-view').style.display = 'none';
   document.getElementById('comp-view').style.display = 'block';
+  document.getElementById('latam-compare-section').style.display = 'none';
 
   let countries;
   if(selectedCountry === 'all') countries = COUNTRIES_INDIVIDUAL;
@@ -291,17 +333,18 @@ function renderComparison(){
             : selectedCountry + ' — entrenamientos por fabricante';
   document.getElementById('comp-sub').textContent = sub;
 
-  if(compChart) { compChart.destroy(); compChart = null; }
+  if(compChart){ compChart.destroy(); compChart = null; }
 
+  const filtered = getFilteredEntries();
   const ctx = document.getElementById('comp-chart').getContext('2d');
   compChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: countries,
-      datasets: PARTNER_LABELS.map((label,i) => ({
-        label,
-        data: countries.map(c => PARTNER_DATA[c]?.[PARTNER_KEYS[i]]||0),
-        backgroundColor: PARTNER_COLORS[i],
+      datasets: filtered.map(e => ({
+        label: e.label,
+        data: countries.map(c => PARTNER_DATA[c]?.[e.key]||0),
+        backgroundColor: e.color,
         borderRadius: 4,
         borderSkipped: false,
       }))
@@ -315,10 +358,7 @@ function renderComparison(){
           position: 'top',
           labels: {font:{size:12}, padding:16, usePointStyle:true, pointStyleWidth:10}
         },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-        },
+        tooltip: {mode:'index', intersect:false},
         datalabels: {display: false}
       },
       scales: {
@@ -334,7 +374,6 @@ function renderComparison(){
 }
 
 // ── HP LOGO ────────────────────────────────────────────────────
-// Try to load from same folder
 (function(){
   const img = document.getElementById('hp-logo');
   img.onerror = () => { img.style.display='none'; };
@@ -345,9 +384,8 @@ function renderComparison(){
 if(window.ChartDataLabels) Chart.register(ChartDataLabels);
 
 // ── LATAM BIG COMPARISON CHART ────────────────────────────────
-const COMPARE_COUNTRIES = ['Chile','Colombia','México','Perú','Argentina','Costa Rica',
-                            'Ecuador','El Salvador','Guatemala','Honduras','Panamá'];
-let selectedPartner = 0; // index into PARTNER_KEYS
+const COMPARE_COUNTRIES = ['Chile','Colombia','México','Perú','Argentina','CACE'];
+let selectedPartner = 0;
 let latamCompareChart = null;
 
 function buildPartnerSelectorBtns(){
@@ -376,14 +414,13 @@ function renderLatamCompare(){
   const ctx = document.getElementById('latam-compare-chart').getContext('2d');
   const highlightIdx = selectedPartner;
 
-  // Build datasets: one per partner, highlighted partner full opacity, others 35%
   const datasets = PARTNER_LABELS.map((label, i) => {
     const isHighlight = i === highlightIdx;
     const color = PARTNER_COLORS[i];
     return {
       label,
       data: COMPARE_COUNTRIES.map(c => PARTNER_DATA[c]?.[PARTNER_KEYS[i]] || 0),
-      backgroundColor: isHighlight ? color : color + '59', // 35% opacity for others
+      backgroundColor: isHighlight ? color : color + '59',
       borderRadius: 5,
       borderSkipped: false,
       order: isHighlight ? 0 : 1,
@@ -400,9 +437,9 @@ function renderLatamCompare(){
       plugins: {
         legend: {
           position: 'top',
-          labels: { font:{size:12}, padding:16, usePointStyle:true, pointStyleWidth:10 }
+          labels: {font:{size:12}, padding:16, usePointStyle:true, pointStyleWidth:10}
         },
-        tooltip: { mode:'index', intersect:false },
+        tooltip: {mode:'index', intersect:false},
         datalabels: {
           color: '#fff',
           anchor: 'center',
@@ -413,7 +450,6 @@ function renderLatamCompare(){
           }),
           formatter: (value, ctx) => {
             if(!value) return '';
-            // Only show label for highlighted partner OR if value >= 5
             if(ctx.datasetIndex === highlightIdx) return value;
             if(value >= 5) return value;
             return '';
@@ -421,14 +457,15 @@ function renderLatamCompare(){
         }
       },
       scales: {
-        x: { grid:{display:false}, ticks:{font:{size:11}} },
-        y: { beginAtZero:true, grid:{color:'#f0f4fa'}, ticks:{font:{size:11}} }
+        x: {grid:{display:false}, ticks:{font:{size:11}}},
+        y: {beginAtZero:true, grid:{color:'#f0f4fa'}, ticks:{font:{size:11}}}
       }
     }
   });
 }
 
 // ── INIT ───────────────────────────────────────────────────────
+buildPartnerFilterBtns();
 buildPills();
 renderGrid();
 buildPartnerSelectorBtns();
