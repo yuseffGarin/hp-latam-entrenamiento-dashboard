@@ -413,13 +413,19 @@ function renderLatamCompare(){
 
   const ctx = document.getElementById('latam-compare-chart').getContext('2d');
   const highlightIdx = selectedPartner;
+  const highlightKey = PARTNER_KEYS[highlightIdx];
+
+  // Ordenar países de mayor a menor según el partner seleccionado
+  const sortedCountries = [...COMPARE_COUNTRIES].sort((a,b) =>
+    (PARTNER_DATA[b]?.[highlightKey]||0) - (PARTNER_DATA[a]?.[highlightKey]||0)
+  );
 
   const datasets = PARTNER_LABELS.map((label, i) => {
     const isHighlight = i === highlightIdx;
     const color = PARTNER_COLORS[i];
     return {
       label,
-      data: COMPARE_COUNTRIES.map(c => PARTNER_DATA[c]?.[PARTNER_KEYS[i]] || 0),
+      data: sortedCountries.map(c => PARTNER_DATA[c]?.[PARTNER_KEYS[i]] || 0),
       backgroundColor: isHighlight ? color : color + '59',
       borderRadius: 5,
       borderSkipped: false,
@@ -428,12 +434,11 @@ function renderLatamCompare(){
   });
 
   // Total del partner destacado para calcular %
-  const highlightKey = PARTNER_KEYS[highlightIdx];
-  const highlightTotal = COMPARE_COUNTRIES.reduce((s,c) => s + (PARTNER_DATA[c]?.[highlightKey]||0), 0);
+  const highlightTotal = sortedCountries.reduce((s,c) => s + (PARTNER_DATA[c]?.[highlightKey]||0), 0);
 
   latamCompareChart = new Chart(ctx, {
     type: 'bar',
-    data: { labels: COMPARE_COUNTRIES, datasets },
+    data: { labels: sortedCountries, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: true,
@@ -450,7 +455,7 @@ function renderLatamCompare(){
           align: 'center',
           font: (ctx) => ({
             weight: ctx.datasetIndex === highlightIdx ? '800' : '600',
-            size:   ctx.datasetIndex === highlightIdx ? 13 : 11,
+            size:   ctx.datasetIndex === highlightIdx ? 12 : 10,
           }),
           formatter: (value, ctx) => {
             if(!value) return '';
