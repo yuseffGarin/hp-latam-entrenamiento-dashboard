@@ -58,6 +58,18 @@
   /* TOTAL BADGE */
   .total-badge{font-size:11px;background:#e8f0fe;color:#0249D6;border-radius:8px;
                 padding:2px 8px;font-weight:700;margin-left:auto}
+
+  /* PARTNER COMPARISON SECTION */
+  .section-title{font-size:16px;font-weight:700;color:#1a2b5e;margin-bottom:4px}
+  .section-sub{font-size:12px;color:#778;margin-bottom:18px}
+  .partner-selector{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+  .psel-btn{display:inline-flex;align-items:center;gap:7px;font-size:12px;padding:6px 16px;
+             border-radius:12px;border:2px solid #ccd6e8;background:#fff;color:#445;
+             cursor:pointer;font-weight:600;transition:all .15s}
+  .psel-btn.active{color:#fff;border-color:transparent}
+  .psel-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .big-chart-wrap{background:#fff;border-radius:16px;padding:28px;
+                   box-shadow:0 2px 12px #0001;border:1px solid #e4eaf5;margin:0 24px 40px}
 </style>
 </head>
 <body>
@@ -85,6 +97,15 @@
 <div class="pill-bar" id="pill-bar"></div>
 
 <div class="grid" id="grid-view"></div>
+
+<!-- BIG LATAM COMPARISON -->
+<div class="big-chart-wrap" id="latam-compare-section">
+  <div class="section-title">Comparación LATAM por Partner</div>
+  <div class="section-sub">Selecciona un fabricante para destacarlo frente al resto en todos los países</div>
+  <div class="partner-selector" id="partner-selector-btns"></div>
+  <canvas id="latam-compare-chart"></canvas>
+</div>
+
 <div class="comparison" id="comp-view" style="display:none">
   <div class="comp-card">
     <div class="comp-title">Comparación por País</div>
@@ -323,9 +344,95 @@ function renderComparison(){
 // ── REGISTER DATALABELS ────────────────────────────────────────
 if(window.ChartDataLabels) Chart.register(ChartDataLabels);
 
+// ── LATAM BIG COMPARISON CHART ────────────────────────────────
+const COMPARE_COUNTRIES = ['Chile','Colombia','México','Perú','Argentina','Costa Rica',
+                            'Ecuador','El Salvador','Guatemala','Honduras','Panamá'];
+let selectedPartner = 0; // index into PARTNER_KEYS
+let latamCompareChart = null;
+
+function buildPartnerSelectorBtns(){
+  const el = document.getElementById('partner-selector-btns');
+  el.innerHTML = PARTNER_LABELS.map((label,i) => {
+    const isActive = i === selectedPartner;
+    const color = PARTNER_COLORS[i];
+    return `<button class="psel-btn ${isActive?'active':''}"
+      style="${isActive ? `background:${color};` : ''}"
+      onclick="selectPartner(${i})">
+      <span class="psel-dot" style="background:${color};${isActive?'background:#fff5':''}"></span>
+      ${label}
+    </button>`;
+  }).join('');
+}
+
+window.selectPartner = function(idx){
+  selectedPartner = idx;
+  buildPartnerSelectorBtns();
+  renderLatamCompare();
+};
+
+function renderLatamCompare(){
+  if(latamCompareChart){ latamCompareChart.destroy(); latamCompareChart = null; }
+
+  const ctx = document.getElementById('latam-compare-chart').getContext('2d');
+  const highlightIdx = selectedPartner;
+
+  // Build datasets: one per partner, highlighted partner full opacity, others 35%
+  const datasets = PARTNER_LABELS.map((label, i) => {
+    const isHighlight = i === highlightIdx;
+    const color = PARTNER_COLORS[i];
+    return {
+      label,
+      data: COMPARE_COUNTRIES.map(c => PARTNER_DATA[c]?.[PARTNER_KEYS[i]] || 0),
+      backgroundColor: isHighlight ? color : color + '59', // 35% opacity for others
+      borderRadius: 5,
+      borderSkipped: false,
+      order: isHighlight ? 0 : 1,
+    };
+  });
+
+  latamCompareChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: COMPARE_COUNTRIES, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2.8,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { font:{size:12}, padding:16, usePointStyle:true, pointStyleWidth:10 }
+        },
+        tooltip: { mode:'index', intersect:false },
+        datalabels: {
+          color: '#fff',
+          anchor: 'center',
+          align: 'center',
+          font: (ctx) => ({
+            weight: ctx.datasetIndex === highlightIdx ? '800' : '600',
+            size:   ctx.datasetIndex === highlightIdx ? 12 : 10,
+          }),
+          formatter: (value, ctx) => {
+            if(!value) return '';
+            // Only show label for highlighted partner OR if value >= 5
+            if(ctx.datasetIndex === highlightIdx) return value;
+            if(value >= 5) return value;
+            return '';
+          }
+        }
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{font:{size:11}} },
+        y: { beginAtZero:true, grid:{color:'#f0f4fa'}, ticks:{font:{size:11}} }
+      }
+    }
+  });
+}
+
 // ── INIT ───────────────────────────────────────────────────────
 buildPills();
 renderGrid();
+buildPartnerSelectorBtns();
+renderLatamCompare();
 </script>
 </body>
 </html>
