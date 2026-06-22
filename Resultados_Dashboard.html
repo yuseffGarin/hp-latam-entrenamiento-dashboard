@@ -1795,4 +1795,21 @@ setInterval(updateCountdown, 1000);
   };
 
   window.mgmtDeleteUser = function(name) {
-    if (!confirm(
+    if (!confirm(`¿Eliminar usuario "${name}"?`)) return;
+    const users = getUsers();
+    delete users[name];
+    saveUsers(users);
+    renderUserList();
+  };
+
+  function showMsg(el, text, type) {
+    el.textContent = text;
+    el.style.display = 'block';
+    el.style.background = type==='ok' ? 'rgba(0,168,90,0.15)' : 'rgba(239,51,36,0.15)';
+    el.style.color = type==='ok' ? '#00A85A' : '#ff6b5b';
+  }
+
+})();
+</script>
+</body>
+</html>
