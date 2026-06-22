@@ -911,6 +911,7 @@ function renderAll() {
   const PARTNER_COLORS  = ['#A020F0','#0071C5','#ED1C24','#FFB900','#76B900'];
   const PARTNER_BY_COUNTRY = {
     'LATAM':      {Q:56, I:82, A:87, M:55, N:41},
+    'CACE':       {Q:0,  I:7,  A:7,  M:7,  N:0},
     'Argentina':  {Q:2,  I:2,  A:2,  M:1,  N:1},
     'Brasil':     {Q:0,  I:0,  A:0,  M:0,  N:0},
     'Chile':      {Q:27, I:25, A:26, M:5,  N:9},
@@ -926,7 +927,12 @@ function renderAll() {
   };
   let partnerFilter = 'LATAM';
 
+  const CACE_COUNTRIES = ['El Salvador','Costa Rica','Ecuador','Guatemala','Honduras','Panamá'];
+
   function getPartnerData(country) {
+    if (country === 'CACE') {
+      return PARTNER_KEYS.map(k => CACE_COUNTRIES.reduce((s,c) => s + (PARTNER_BY_COUNTRY[c]?.[k]||0), 0));
+    }
     const d = PARTNER_BY_COUNTRY[country] || PARTNER_BY_COUNTRY['LATAM'];
     return PARTNER_KEYS.map(k => d[k] || 0);
   }
@@ -937,12 +943,17 @@ function renderAll() {
     const countries = Object.keys(PARTNER_BY_COUNTRY);
     container.innerHTML = countries.map(c => {
       const active = c === partnerFilter;
-      const hasData = c === 'LATAM' || Object.values(PARTNER_BY_COUNTRY[c]).some(v=>v>0);
+      const isSpecial = c === 'LATAM' || c === 'CACE';
+      const hasData = isSpecial || Object.values(PARTNER_BY_COUNTRY[c]).some(v=>v>0);
+      const flagSrc = FLAG_IMGS[c] || '';
+      const flagEl = flagSrc && !isSpecial ? `<img src="${flagSrc}" style="width:16px;height:11px;object-fit:cover;border-radius:1px;margin-right:3px;vertical-align:middle">` : '';
+      const label = c === 'CACE' ? '🌎 CACE' : c;
       return `<button onclick="setPartnerFilter('${c}')"
-        style="font-size:10px;padding:3px 10px;border-radius:12px;border:1.5px solid ${active?'#0047AB':'#ccd6e8'};
+        style="display:inline-flex;align-items:center;font-size:10px;padding:3px 10px;border-radius:12px;
+               border:1.5px solid ${active?'#0047AB':'#ccd6e8'};
                background:${active?'#0047AB':'#f0f4fa'};color:${active?'#fff':'#445'};
                font-weight:${active?'700':'500'};cursor:pointer;opacity:${hasData?1:0.45};
-               transition:all .15s">${c}</button>`;
+               transition:all .15s">${flagEl}${label}</button>`;
     }).join('');
   }
 
