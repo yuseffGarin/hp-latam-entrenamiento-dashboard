@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script>if(window.ChartDataLabels)Chart.register(ChartDataLabels);</script>
 <style>
 :root {
   --hp-blue: #0249D6;
@@ -908,7 +910,7 @@ function renderAll() {
   const PARTNER_KEYS    = ['Q','I','A','M','N'];
   const PARTNER_COLORS  = ['#A020F0','#0071C5','#ED1C24','#FFB900','#76B900'];
   const PARTNER_BY_COUNTRY = {
-    'LATAM':      {Q:49, I:79, A:83, M:46, N:38},
+    'LATAM':      {Q:56, I:82, A:87, M:55, N:41},
     'Argentina':  {Q:2,  I:2,  A:2,  M:1,  N:1},
     'Brasil':     {Q:0,  I:0,  A:0,  M:0,  N:0},
     'Chile':      {Q:27, I:25, A:26, M:5,  N:9},
@@ -918,7 +920,7 @@ function renderAll() {
     'El Salvador':{Q:0,  I:1,  A:1,  M:1,  N:0},
     'Guatemala':  {Q:0,  I:1,  A:1,  M:1,  N:0},
     'Honduras':   {Q:0,  I:1,  A:1,  M:1,  N:0},
-    'México':     {Q:0,  I:0,  A:0,  M:0,  N:0},
+    'México':     {Q:7,  I:3,  A:4,  M:9,  N:3},
     'Panamá':     {Q:0,  I:1,  A:1,  M:1,  N:0},
     'Perú':       {Q:8,  I:10, A:13, M:5,  N:6}
   };
@@ -967,8 +969,19 @@ function renderAll() {
                  backgroundColor: PARTNER_COLORS,
                  borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.3,
-      plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:12}},
-               tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${((c.raw/_initPartnerTotal)*100).toFixed(1)}%)`}}}}
+      plugins:{
+        legend:{position:'right',labels:{font:{size:10},boxWidth:12}},
+        tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${((c.raw/_initPartnerTotal)*100).toFixed(1)}%)`}},
+        datalabels:{
+          color:'#fff',
+          font:{weight:'700',size:11},
+          formatter:(value,ctx)=>{
+            const total=ctx.dataset.data.reduce((a,b)=>a+b,0)||1;
+            const pct=((value/total)*100);
+            return pct>=5 ? pct.toFixed(0)+'%' : '';
+          }
+        }
+      }}
   });
   buildPartnerBtns();
 
