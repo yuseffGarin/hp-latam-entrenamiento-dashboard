@@ -839,8 +839,10 @@ function actTotal(act) { return filteredCountries().reduce((s,c)=>s+getByAct(c,a
 const charts = {};
 
 function makeChart(id, cfg) {
-  if (charts[id]) charts[id].destroy();
-  charts[id] = new Chart(document.getElementById(id), cfg);
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (charts[id]) { try { charts[id].destroy(); } catch(e){} }
+  charts[id] = new Chart(el, cfg);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1653,7 +1655,79 @@ Chart.defaults.plugins.legend.labels.padding = 16;
   });
 })();
 
-renderAll();
+// ════════════════════════════════════════════════════════════
+// AUTH SAFETY NET — definido ANTES de renderAll() para que el
+// login funcione incluso si los gráficos lanzan un error.
+// initAuth() más abajo lo sobreescribe con la versión completa.
+// ════════════════════════════════════════════════════════════
+(function() {
+  const SK = 'hp_dash_users', SSK = 'hp_dash_session';
+  function h(p) { return btoa(unescape(encodeURIComponent(p + '_hp2026salt'))); }
+
+  // Siempre sincroniza los usuarios base con las credenciales correctas
+  try {
+    const u = JSON.parse(localStorage.getItem(SK) || '{}');
+    u['admin']  = { hash: h('hp2026'),    role: 'admin',  created: u['admin']?.created  || new Date().toISOString() };
+    u['yuseff'] = { hash: h('hp2026'),    role: 'admin',  created: u['yuseff']?.created || new Date().toISOString() };
+    u['hp']     = { hash: h('latam2026'), role: 'viewer', created: u['hp']?.created     || new Date().toISOString() };
+    localStorage.setItem(SK, JSON.stringify(u));
+  } catch(e) {}
+
+  // Restaurar sesión activa si existe
+  try {
+    const sess = JSON.parse(sessionStorage.getItem(SSK));
+    if (sess?.username) {
+      const users = JSON.parse(localStorage.getItem(SK) || '{}');
+      if (users[sess.username]) {
+        const ov = document.getElementById('auth-overlay');
+        if (ov) ov.style.display = 'none';
+        const tu = document.getElementById('topbar-user');
+        if (tu) tu.style.display = 'flex';
+        const tn = document.getElementById('topbar-username');
+        if (tn) tn.textContent = sess.username;
+        if (users[sess.username].role === 'admin') {
+          const btn = document.getElementById('btn-user-mgmt');
+          if (btn) btn.style.display = 'inline-block';
+        }
+      }
+    }
+  } catch(e) {}
+
+  window.authLogin = function() {
+    const username = (document.getElementById('auth-user')?.value || '').trim();
+    const password = document.getElementById('auth-pass')?.value || '';
+    const errEl = document.getElementById('auth-error');
+    if (!username || !password) {
+      if (errEl) { errEl.textContent = 'Ingresa usuario y contraseña.'; errEl.style.display = 'block'; }
+      return;
+    }
+    try {
+      const users = JSON.parse(localStorage.getItem(SK) || '{}');
+      if (users[username] && users[username].hash === h(password)) {
+        sessionStorage.setItem(SSK, JSON.stringify({ username, role: users[username].role }));
+        const ov = document.getElementById('auth-overlay');
+        if (ov) ov.style.display = 'none';
+        const tu = document.getElementById('topbar-user');
+        if (tu) tu.style.display = 'flex';
+        const tn = document.getElementById('topbar-username');
+        if (tn) tn.textContent = username;
+        if (users[username].role === 'admin') {
+          const btn = document.getElementById('btn-user-mgmt');
+          if (btn) btn.style.display = 'inline-block';
+        }
+        if (errEl) errEl.style.display = 'none';
+      } else {
+        if (errEl) { errEl.textContent = 'Usuario o contraseña incorrectos.'; errEl.style.display = 'block'; }
+        const passEl = document.getElementById('auth-pass');
+        if (passEl) passEl.value = '';
+      }
+    } catch(e) {
+      if (errEl) { errEl.textContent = 'Error del sistema. Intente de nuevo.'; errEl.style.display = 'block'; }
+    }
+  };
+})();
+
+try { renderAll(); } catch(e) { console.error('[Dashboard] renderAll error:', e); }
 
 // ════════════════════════════════════════════════════════════
 // AUTO-REFRESH
@@ -1699,11 +1773,11 @@ setInterval(updateCountdown, 1000);
   };
 
   let users = getUsers();
-  let _changed = false;
+  // Siempre actualiza las credenciales de los usuarios base (overwrite hash/role)
   for (const [name, data] of Object.entries(SEED_USERS)) {
-    if (!users[name]) { users[name] = { ...data, created: new Date().toISOString() }; _changed = true; }
+    users[name] = { ...data, created: users[name]?.created || new Date().toISOString() };
   }
-  if (_changed) saveUsers(users);
+  saveUsers(users);
 
   function getSession() {
     try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch(e) { return null; }
