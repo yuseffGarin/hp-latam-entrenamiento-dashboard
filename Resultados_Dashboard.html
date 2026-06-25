@@ -11,7 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>if(window.ChartDataLabels)Chart.register(ChartDataLabels);</script>
 <style>
-:root {
+:root {h
   --hp-blue: #0249D6;
   --hp-dark: #0E2841;
   --hp-mid: #0249D6;
@@ -1447,6 +1447,7 @@ function renderAll() {
   });
 
   // ── PIE: Products ──────────────────────────────────────────
+  const prodTotals = RAW.products.filter(p=>state.products.includes(p)).map(p=>productTotal(p));
   makeChart('chart-pie-product',{
     type:'pie',
     data:{
