@@ -169,6 +169,51 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 .region-flag-single img{width:48px;height:32px;object-fit:cover;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .region-flag-strip{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;margin:4px 0 2px}
 .region-flag-strip img{width:28px;height:18px;object-fit:cover;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.region-detail-btn{margin-top:10px;width:100%;padding:5px 0;background:#0249D6;color:#fff;border:none;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:background .15s}
+.region-detail-btn:hover{background:#0138a8}
+
+/* ── REGION DETAIL MODAL ── */
+.rdm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;align-items:center;justify-content:center;padding:20px}
+.rdm-overlay.open{display:flex}
+.rdm-box{background:#fff;border-radius:18px;width:100%;max-width:780px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.rdm-header{background:linear-gradient(135deg,#0249D6,#1A6FE8);padding:22px 28px 18px;border-radius:18px 18px 0 0;display:flex;align-items:center;gap:14px}
+.rdm-flags{display:flex;gap:4px;flex-wrap:wrap}
+.rdm-flags img{width:32px;height:21px;object-fit:cover;border-radius:2px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.rdm-htitle{color:#fff;flex:1}
+.rdm-htitle h2{font-size:18px;font-weight:800;margin:0}
+.rdm-htitle p{font-size:12px;color:rgba(255,255,255,.8);margin:2px 0 0}
+.rdm-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rdm-close:hover{background:rgba(255,255,255,.35)}
+.rdm-body{padding:24px 28px 28px;display:flex;flex-direction:column;gap:24px}
+
+/* comparison table */
+.rdm-section-title{font-size:12px;font-weight:700;color:#0249D6;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #e8f0fe}
+.rdm-table{width:100%;border-collapse:collapse;font-size:13px}
+.rdm-table th{background:#f0f4fa;color:#445;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:8px 12px;text-align:left}
+.rdm-table td{padding:8px 12px;border-bottom:1px solid #f0f4fa;color:#333}
+.rdm-table tr:last-child td{border-bottom:none}
+.rdm-table .val{font-weight:700;font-size:15px;color:#1a2b5e}
+.rdm-table .pct{font-size:11px;color:#0249D6;font-weight:600}
+.rdm-pbar-wrap{background:#e8f0fe;border-radius:4px;height:6px;width:100%;margin-top:4px}
+.rdm-pbar{background:#0249D6;height:6px;border-radius:4px;transition:width .4s}
+
+/* monthly table */
+.rdm-month-table{width:100%;border-collapse:collapse;font-size:13px}
+.rdm-month-table th{background:#0249D6;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:9px 14px;text-align:center}
+.rdm-month-table th:first-child{text-align:left;border-radius:8px 0 0 0}
+.rdm-month-table th:last-child{border-radius:0 8px 0 0}
+.rdm-month-table td{padding:8px 14px;border-bottom:1px solid #f0f4fa;text-align:center;vertical-align:middle}
+.rdm-month-table td:first-child{text-align:left;font-weight:700;color:#1a2b5e;font-size:12px}
+.rdm-month-table tr:last-child td{border-bottom:none}
+.rdm-month-table input{width:80px;padding:5px 8px;border:1.5px solid #dde4f0;border-radius:6px;font-size:13px;text-align:center;color:#222;font-family:inherit;transition:border-color .15s}
+.rdm-month-table input:focus{outline:none;border-color:#0249D6;background:#f0f4fa}
+.rdm-cumpl{font-weight:700;font-size:13px;padding:4px 10px;border-radius:10px;display:inline-block}
+.rdm-cumpl.green{background:#d4f7e7;color:#00875a}
+.rdm-cumpl.yellow{background:#fff8e1;color:#b8860b}
+.rdm-cumpl.red{background:#ffe8e8;color:#c0392b}
+.rdm-save-btn{margin-top:14px;padding:9px 24px;background:#0249D6;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .15s}
+.rdm-save-btn:hover{background:#0138a8}
+.rdm-saved-msg{display:none;color:#00875a;font-size:12px;font-weight:600;margin-left:12px}
 
 /* ── PROGRESS BARS ── */
 .progress-list{display:flex;flex-direction:column;gap:10px}
@@ -443,6 +488,54 @@ select.filter-select:focus{border-color:var(--hp-blue)}
   <!-- REGION CARDS -->
   <div class="section-title">Actividad por Región</div>
   <div class="region-map" id="region-cards"></div>
+
+  <!-- REGION DETAIL MODAL -->
+  <div class="rdm-overlay" id="rdm-overlay" onclick="if(event.target===this)closeRegionDetail()">
+    <div class="rdm-box">
+      <div class="rdm-header">
+        <div class="rdm-flags" id="rdm-flags"></div>
+        <div class="rdm-htitle">
+          <h2 id="rdm-title">—</h2>
+          <p id="rdm-subtitle">—</p>
+        </div>
+        <button class="rdm-close" onclick="closeRegionDetail()">✕</button>
+      </div>
+      <div class="rdm-body">
+        <!-- Comparison section -->
+        <div>
+          <div class="rdm-section-title">📊 Actividad por categoría — Región vs LATAM</div>
+          <table class="rdm-table" id="rdm-comp-table">
+            <thead><tr>
+              <th>Categoría</th>
+              <th>Región</th>
+              <th>LATAM Total</th>
+              <th>% del Total</th>
+              <th style="width:120px">Participación</th>
+            </tr></thead>
+            <tbody id="rdm-comp-body"></tbody>
+          </table>
+        </div>
+        <!-- Monthly planning section -->
+        <div>
+          <div class="rdm-section-title">📅 Planificación Mensual — Planificado vs Realizado</div>
+          <table class="rdm-month-table" id="rdm-month-table">
+            <thead><tr>
+              <th>Mes</th>
+              <th>Planificado</th>
+              <th>Realizado</th>
+              <th>% Cumplimiento</th>
+              <th>Notas</th>
+            </tr></thead>
+            <tbody id="rdm-month-body"></tbody>
+          </table>
+          <div style="margin-top:14px;display:flex;align-items:center">
+            <button class="rdm-save-btn" onclick="saveRegionPlan()">💾 Guardar planificación</button>
+            <span class="rdm-saved-msg" id="rdm-saved-msg">✓ Guardado correctamente</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ROW 1: Big stacked bar + pie -->
   <div class="chart-grid-2" style="margin-bottom:24px">
@@ -883,12 +976,15 @@ function renderAll() {
     const flagHtml = isSingle
       ? `<div class="region-flag-single"><img src="${FLAG_IMGS[d.countries[0]]||''}" alt="${d.countries[0]}"></div>`
       : `<div class="region-flag-strip">${d.countries.map(c=>`<img src="${FLAG_IMGS[c]||''}" alt="${c}">`).join('')}</div>`;
+    const countriesJson = JSON.stringify(d.countries).replace(/"/g,'&quot;');
+    const totalLatam = countries.reduce((s,c)=>s+c.total,0);
     return `
     <div class="region-card ${regionColors[r]||'cac'}">
       <div class="region-name">${r}</div>
       ${flagHtml}
       <div class="region-total">${d.total}</div>
       <div class="region-countries">${d.countries.join(' · ')}</div>
+      <button class="region-detail-btn" onclick="showRegionDetail('${r}',${d.total},${totalLatam},'${d.countries.join(',')}')">Ver detalle →</button>
     </div>`;
   }).join('');
 
@@ -1705,6 +1801,103 @@ setInterval(updateCountdown, 1000);
   } else {
     renderPresence(null);
   }
+
+  // ── REGION DETAIL MODAL ───────────────────────────────────────
+  const MONTHS = ['Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  let currentRegionKey = '';
+
+  window.showRegionDetail = function(regionName, regionTotal, latamTotal, countriesStr) {
+    currentRegionKey = regionName;
+    const regionCountries = countriesStr.split(',');
+
+    // Header
+    document.getElementById('rdm-title').textContent = regionName;
+    document.getElementById('rdm-subtitle').textContent =
+      regionCountries.length > 1 ? regionCountries.join(' · ') : regionCountries[0];
+
+    // Flags
+    const flagsEl = document.getElementById('rdm-flags');
+    flagsEl.innerHTML = regionCountries.map(c => {
+      const src = FLAG_IMGS[c] || '';
+      return src ? `<img src="${src}" alt="${c}" title="${c}">` : '';
+    }).join('');
+
+    // Comparison table: actkeys per region vs LATAM
+    const regionCData = countries.filter(c => regionCountries.includes(c.country));
+    const actRows = RAW.actKeys.map(act => {
+      const regionVal = regionCData.reduce((s,c) => s + getByAct(c,act), 0);
+      const latamVal  = countries.reduce((s,c) => s + getByAct(c,act), 0);
+      const pct = latamVal ? (regionVal/latamVal*100).toFixed(1) : '0';
+      const barW = Math.min(100, parseFloat(pct));
+      return `<tr>
+        <td><strong>${RAW.actLabels[act]}</strong></td>
+        <td><span class="val">${regionVal}</span></td>
+        <td>${latamVal}</td>
+        <td><span class="pct">${pct}%</span></td>
+        <td><div class="rdm-pbar-wrap"><div class="rdm-pbar" style="width:${barW}%"></div></div></td>
+      </tr>`;
+    });
+    // Total row
+    const pctTotal = latamTotal ? (regionTotal/latamTotal*100).toFixed(1) : '0';
+    actRows.push(`<tr style="background:#f8faff">
+      <td><strong>TOTAL</strong></td>
+      <td><span class="val" style="color:#0249D6">${regionTotal}</span></td>
+      <td>${latamTotal}</td>
+      <td><span class="pct" style="font-weight:800">${pctTotal}%</span></td>
+      <td><div class="rdm-pbar-wrap"><div class="rdm-pbar" style="width:${Math.min(100,parseFloat(pctTotal))}%"></div></div></td>
+    </tr>`);
+    document.getElementById('rdm-comp-body').innerHTML = actRows.join('');
+
+    // Monthly planning table
+    const saved = JSON.parse(localStorage.getItem('rdm_plan_'+regionName)||'{}');
+    document.getElementById('rdm-month-body').innerHTML = MONTHS.map(m => {
+      const plan = saved[m]?.plan || '';
+      const real = saved[m]?.real || '';
+      const nota = saved[m]?.nota || '';
+      const cumpl = plan && real ? Math.round(parseInt(real)/parseInt(plan)*100) : null;
+      const cumplHtml = cumpl !== null
+        ? `<span class="rdm-cumpl ${cumpl>=100?'green':cumpl>=70?'yellow':'red'}">${cumpl}%</span>`
+        : `<span style="color:#bbb;font-size:12px">—</span>`;
+      return `<tr>
+        <td>${m}</td>
+        <td><input type="number" min="0" id="plan-${m}" value="${plan}" placeholder="0" oninput="updateCumpl('${m}')"></td>
+        <td><input type="number" min="0" id="real-${m}" value="${real}" placeholder="0" oninput="updateCumpl('${m}')"></td>
+        <td id="cumpl-${m}">${cumplHtml}</td>
+        <td><input type="text" id="nota-${m}" value="${nota}" placeholder="Observaciones..." style="width:140px"></td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('rdm-overlay').classList.add('open');
+  };
+
+  window.updateCumpl = function(m) {
+    const p = parseInt(document.getElementById('plan-'+m)?.value)||0;
+    const r = parseInt(document.getElementById('real-'+m)?.value)||0;
+    const el = document.getElementById('cumpl-'+m);
+    if(!el) return;
+    if(!p){ el.innerHTML = '<span style="color:#bbb;font-size:12px">—</span>'; return; }
+    const c = Math.round(r/p*100);
+    el.innerHTML = `<span class="rdm-cumpl ${c>=100?'green':c>=70?'yellow':'red'}">${c}%</span>`;
+  };
+
+  window.saveRegionPlan = function() {
+    const data = {};
+    MONTHS.forEach(m => {
+      data[m] = {
+        plan: document.getElementById('plan-'+m)?.value || '',
+        real: document.getElementById('real-'+m)?.value || '',
+        nota: document.getElementById('nota-'+m)?.value || '',
+      };
+    });
+    localStorage.setItem('rdm_plan_'+currentRegionKey, JSON.stringify(data));
+    const msg = document.getElementById('rdm-saved-msg');
+    msg.style.display = 'inline';
+    setTimeout(()=>{ msg.style.display='none'; }, 2500);
+  };
+
+  window.closeRegionDetail = function() {
+    document.getElementById('rdm-overlay').classList.remove('open');
+  };
 
   window.authLogin = function() {
     const u = document.getElementById('auth-user').value.trim();
