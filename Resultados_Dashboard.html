@@ -81,26 +81,25 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 
 /* ── KPI CARDS ── */
 .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
-.kpi-card{background:var(--surface);border-radius:var(--radius);padding:20px 20px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;border:1px solid var(--border)}
-.kpi-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.12)}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:5px;border-radius:4px 0 0 4px}
-.kpi-card.blue::before{background:#0249D6}
-.kpi-card.purple::before{background:#2A67DC}
-.kpi-card.green::before{background:#4D82E8}
-.kpi-card.orange::before{background:#6F99E8}
-.kpi-card.dark::before{background:#0E2841}
-.kpi-card.teal::before{background:#568392}
-.kpi-card.blue .kpi-value{color:#0249D6}
-.kpi-card.purple .kpi-value{color:#2A67DC}
-.kpi-card.green .kpi-value{color:#4D82E8}
-.kpi-card.orange .kpi-value{color:#6F99E8}
-.kpi-card.dark .kpi-value{color:#0E2841}
-.kpi-card.teal .kpi-value{color:#568392}
-.kpi-text{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%}
+.kpi-card{border-radius:14px;padding:18px 20px 16px;box-shadow:0 4px 18px rgba(0,0,0,0.18);display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;border:none}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.28)}
+.kpi-card.blue  {background:linear-gradient(135deg,#1565D8 0%,#0249D6 100%)}
+.kpi-card.purple{background:linear-gradient(135deg,#3575E8 0%,#2A67DC 100%)}
+.kpi-card.green {background:linear-gradient(135deg,#5E93F0 0%,#4D82E8 100%)}
+.kpi-card.orange{background:linear-gradient(135deg,#85ABEC 0%,#6F99E8 100%)}
+.kpi-card.dark  {background:linear-gradient(135deg,#1A3A5C 0%,#0E2841 100%)}
+.kpi-card.teal  {background:linear-gradient(135deg,#6A9BA8 0%,#568392 100%)}
+.kpi-text{display:flex;flex-direction:column;align-items:flex-start;gap:0;flex:1;min-width:0}
 .kpi-logo-right{display:none}
-.kpi-label{font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px}
-.kpi-value{font-size:36px;font-weight:800;line-height:1;font-family:Arial,sans-serif;margin-bottom:4px}
-.kpi-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.kpi-icon-circle{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.kpi-label{font-size:10px;color:rgba(255,255,255,0.85);font-weight:700;text-transform:uppercase;letter-spacing:0.9px;margin-bottom:8px}
+.kpi-value{font-size:30px;font-weight:800;color:#fff;line-height:1;font-family:Arial,sans-serif;margin-bottom:6px}
+.kpi-divider{width:36px;height:2px;background:rgba(255,255,255,0.5);border-radius:2px;margin-bottom:6px}
+.kpi-sub{font-size:11px;color:rgba(255,255,255,0.75);margin-top:0}
+.kpi-trend{font-size:11px;font-weight:700;margin-top:4px;color:#fff}
+.kpi-trend.up{color:#A8F0C6}
+.kpi-trend.down{color:#FFB3B3}
+.kpi-trend.flat{color:#FFE5A0}
 .kpi-trend{font-size:11px;font-weight:700;margin-top:6px}
 .kpi-trend.up{color:var(--green)}
 .kpi-trend.down{color:var(--red)}
@@ -393,55 +392,61 @@ select.filter-select:focus{border-color:var(--hp-blue)}
       <div class="kpi-text">
         <div class="kpi-label">Total Actividades</div>
         <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-divider"></div>
         <div class="kpi-sub">3 categorías de producto</div>
         <div class="kpi-trend up" id="kpi-trend-total">▲ +8.7% vs Junio</div>
       </div>
-      <div class="kpi-logo-right"><img src="" id="logo-actividades" alt="Actividades"></div>
+      <div class="kpi-icon-circle">📋</div>
     </div>
     <div class="kpi-card purple">
       <div class="kpi-text">
         <div class="kpi-label">Print</div>
         <div class="kpi-value" id="kpi-print">—</div>
+        <div class="kpi-divider"></div>
         <div class="kpi-sub" id="kpi-print-pct">—% del total</div>
         <div class="kpi-trend up">▲ Línea más activa</div>
       </div>
-      <div class="kpi-logo-right"><img src="" id="logo-hp" alt="HP Print"></div>
+      <div class="kpi-icon-circle">🖨️</div>
     </div>
     <div class="kpi-card green">
       <div class="kpi-text">
         <div class="kpi-label">Gaming</div>
         <div class="kpi-value" id="kpi-gaming">—</div>
+        <div class="kpi-divider"></div>
         <div class="kpi-sub" id="kpi-gaming-pct">—% del total</div>
         <div class="kpi-trend flat">→ Crecimiento sostenido</div>
       </div>
-      <div class="kpi-logo-right"><img src="" id="logo-hyperx" alt="HyperX Gaming"></div>
+      <div class="kpi-icon-circle">🎮</div>
     </div>
     <div class="kpi-card orange">
       <div class="kpi-text">
-        <div class="kpi-label">Computo</div>
+        <div class="kpi-label">Cómputo</div>
         <div class="kpi-value" id="kpi-computo">—</div>
+        <div class="kpi-divider"></div>
         <div class="kpi-sub" id="kpi-computo-pct">—% del total</div>
         <div class="kpi-trend up">▲ En desarrollo</div>
       </div>
-      <div class="kpi-logo-right"><img src="" id="logo-omnibook" alt="Omnibook Cómputo"></div>
+      <div class="kpi-icon-circle">💻</div>
     </div>
     <div class="kpi-card dark">
       <div class="kpi-text">
         <div class="kpi-label">Países Activos</div>
         <div class="kpi-value" id="kpi-paises">—</div>
+        <div class="kpi-divider"></div>
         <div class="kpi-sub">de 12 mercados</div>
         <div class="kpi-trend flat" id="kpi-region-txt">LATAM</div>
       </div>
-      <div class="kpi-logo-right"><img src="" id="logo-mundo" alt="Países LATAM"></div>
+      <div class="kpi-icon-circle">🌎</div>
     </div>
     <div class="kpi-card teal">
       <div class="kpi-text">
         <div class="kpi-label">Entrenadores</div>
         <div class="kpi-value" id="kpi-trainers">—</div>
+        <div class="kpi-divider"></div>
         <div class="kpi-sub" id="kpi-trainer-active">activos en el período</div>
         <div class="kpi-trend up">▲ Red activa</div>
       </div>
-      <div class="kpi-logo-right" style="font-size:40px">👥</div>
+      <div class="kpi-icon-circle">👥</div>
     </div>
   </div>
 
