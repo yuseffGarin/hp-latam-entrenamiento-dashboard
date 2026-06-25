@@ -80,30 +80,26 @@ select.filter-select:focus{border-color:var(--hp-blue)}
 .section-title::before{content:'//';color:#0249D6;font-weight:900;font-size:16px;letter-spacing:-1px;font-family:'Inter Tight',Arial,sans-serif;flex-shrink:0}
 
 /* ── KPI CARDS ── */
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
-.kpi-card{border-radius:14px;padding:20px 24px 18px;box-shadow:0 4px 18px rgba(0,0,0,0.18);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:0;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;border:none}
-.kpi-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.28)}
-.kpi-card.blue  {background:linear-gradient(135deg,#1565D8 0%,#0249D6 100%)}
-.kpi-card.purple{background:linear-gradient(135deg,#3575E8 0%,#2A67DC 100%)}
-.kpi-card.green {background:linear-gradient(135deg,#5E93F0 0%,#4D82E8 100%)}
-.kpi-card.orange{background:linear-gradient(135deg,#85ABEC 0%,#6F99E8 100%)}
-.kpi-card.dark  {background:linear-gradient(135deg,#1A3A5C 0%,#0E2841 100%)}
-.kpi-card.teal  {background:linear-gradient(135deg,#6A9BA8 0%,#568392 100%)}
-.kpi-text{display:flex;flex-direction:column;align-items:flex-start;gap:0;flex:1;min-width:0}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{border-radius:14px;padding:22px 24px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.2);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;border:none}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.3)}
+.kpi-card.blue  {background:#1A6FE8}
+.kpi-card.purple{background:#2A67DC}
+.kpi-card.green {background:#4475D0}
+.kpi-card.orange{background:#3D6BC7}
+.kpi-card.dark  {background:#0E2841}
+.kpi-card.teal  {background:#2E6B8A}
+.kpi-text{display:flex;flex-direction:column;align-items:flex-start;width:100%}
 .kpi-logo-right{display:none}
-.kpi-icon-circle{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.kpi-label{font-size:10px;color:rgba(255,255,255,0.85);font-weight:700;text-transform:uppercase;letter-spacing:0.9px;margin-bottom:8px}
-.kpi-value{font-size:30px;font-weight:800;color:#fff;line-height:1;font-family:Arial,sans-serif;margin-bottom:6px}
-.kpi-divider{width:36px;height:2px;background:rgba(255,255,255,0.5);border-radius:2px;margin-bottom:6px}
-.kpi-sub{font-size:11px;color:rgba(255,255,255,0.75);margin-top:0}
-.kpi-trend{font-size:11px;font-weight:700;margin-top:4px;color:#fff}
-.kpi-trend.up{color:#A8F0C6}
+.kpi-icon-circle{display:none}
+.kpi-label{font-size:10px;color:rgba(255,255,255,0.88);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.kpi-value{font-size:34px;font-weight:800;color:#fff;line-height:1;font-family:Arial,sans-serif;margin-bottom:8px}
+.kpi-divider{width:40px;height:2px;background:rgba(255,255,255,0.45);border-radius:2px;margin-bottom:8px}
+.kpi-sub{font-size:11.5px;color:rgba(255,255,255,0.78);margin:0}
+.kpi-trend{font-size:11.5px;font-weight:700;margin-top:5px}
+.kpi-trend.up  {color:#6EEAAA}
 .kpi-trend.down{color:#FFB3B3}
 .kpi-trend.flat{color:#FFE5A0}
-.kpi-trend{font-size:11px;font-weight:700;margin-top:6px}
-.kpi-trend.up{color:var(--green)}
-.kpi-trend.down{color:var(--red)}
-.kpi-trend.flat{color:var(--yellow)}
 
 /* ── TRAFFIC LIGHT ── */
 .traffic-card{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
