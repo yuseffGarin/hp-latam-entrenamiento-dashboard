@@ -603,7 +603,7 @@ select.filter-select:focus{border-color:var(--hp-blue)}
   </div>
 
   <!-- TRAFFIC LIGHTS + region breakdown -->
-  <div class="chart-grid-traffic" style="margin-bottom:24px">
+  <div class="chart-grid-2" style="margin-bottom:24px">
     <div class="chart-card">
       <div class="chart-head"><div class="chart-name">🚦 Semáforo de Actividad</div></div>
       <div class="traffic-title">Estado por País</div>
@@ -617,15 +617,6 @@ select.filter-select:focus{border-color:var(--hp-blue)}
         </div>
       </div>
       <div class="chart-wrap"><canvas id="chart-region-bar"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-head">
-        <div>
-          <div class="chart-name">Mix de Productos por País</div>
-          <div class="chart-detail">Participación relativa</div>
-        </div>
-      </div>
-      <div class="chart-wrap"><canvas id="chart-product-donut"></canvas></div>
     </div>
   </div>
 
@@ -977,7 +968,7 @@ function renderAll() {
       ? `<div class="region-flag-single"><img src="${FLAG_IMGS[d.countries[0]]||''}" alt="${d.countries[0]}"></div>`
       : `<div class="region-flag-strip">${d.countries.map(c=>`<img src="${FLAG_IMGS[c]||''}" alt="${c}">`).join('')}</div>`;
     const countriesJson = JSON.stringify(d.countries).replace(/"/g,'&quot;');
-    const totalLatam = countries.reduce((s,c)=>s+c.total,0);
+    const totalLatam = countries.reduce((s,c)=>s+getTotal(c),0);
     return `
     <div class="region-card ${regionColors[r]||'cac'}">
       <div class="region-name">${r}</div>
@@ -1419,17 +1410,6 @@ function renderAll() {
       scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}
   });
 
-  // ── PRODUCT DONUT ──────────────────────────────────────────
-  const prodTotals = RAW.products.filter(p=>state.products.includes(p)).map(p=>productTotal(p));
-  makeChart('chart-product-donut',{
-    type:'doughnut',
-    data:{
-      labels:RAW.products.filter(p=>state.products.includes(p)),
-      datasets:[{data:prodTotals,backgroundColor:RAW.products.filter(p=>state.products.includes(p)).map(p=>PROD_COLORS[p]),borderWidth:3,borderColor:'#fff'}]
-    },
-    options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.3,
-      plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}},datalabels:{display:false}}}
-  });
 
   // ── PROGRESS BARS: Activities ──────────────────────────────
   const actTots = RAW.actKeys.map(a=>({act:a,label:RAW.actLabels[a],val:actTotal(a)}));
@@ -1823,10 +1803,11 @@ setInterval(updateCountdown, 1000);
     }).join('');
 
     // Comparison table: actkeys per region vs LATAM
-    const regionCData = countries.filter(c => regionCountries.includes(c.country));
+    const allCountries = RAW.countries;
+    const regionCData = allCountries.filter(c => regionCountries.includes(c.country));
     const actRows = RAW.actKeys.map(act => {
       const regionVal = regionCData.reduce((s,c) => s + getByAct(c,act), 0);
-      const latamVal  = countries.reduce((s,c) => s + getByAct(c,act), 0);
+      const latamVal  = allCountries.reduce((s,c) => s + getByAct(c,act), 0);
       const pct = latamVal ? (regionVal/latamVal*100).toFixed(1) : '0';
       const barW = Math.min(100, parseFloat(pct));
       return `<tr>
